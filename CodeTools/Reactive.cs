@@ -10,6 +10,7 @@ namespace Game.CodeTools
     {
         public Reactive()
         {
+            _value = default;
         }
         public Reactive(T value)
         {

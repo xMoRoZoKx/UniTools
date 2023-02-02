@@ -2,24 +2,100 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using UITools;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
+namespace UITools
+{
+    public class Presenter<Data, View> where View : MonoBehaviour
+    {
+        private List<View> views = new List<View>();
+        public List<View> Present(List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
+        {
+            views.ForEach(v => v.SetActive(false));
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (views.Count <= i)
+                    views.Add(UnityEngine.Object.Instantiate(prefab, container));
+                views[i].SetActive(true);
+                onShow?.Invoke(views[i], list[i]);
+                continue;
+            }
+            return views.GetRange(0, list.Count);
+        }
+    }
+}
 namespace Tools
 {
-    public static class CodeTools
+    public static class RandomTools
     {
         public static void InvokWithChance(Action action, int chance)
         {
             if (UnityEngine.Random.Range(0, 100) <= chance) action?.Invoke();
         }
     }
-    public class TaskTools
+    public static class TaskTools
     {
-        public static Task WaitForSeconds(int value)
+        static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        static CancellationToken token = cancelTokenSource.Token;
+        public static Task WaitForSeconds(float value, bool playInEditorMode = true)
         {
-            return Task.Delay(TimeSpan.FromSeconds(value));
+            return WaitForMilliseconds((long)value * 1000);
+        }
+
+        public static Task WaitForMilliseconds(long value, bool playInEditorMode = true)
+        {
+            if (!Application.isPlaying)
+            {
+                cancelTokenSource.Cancel();
+                cancelTokenSource.Dispose();
+                return null;
+            }
+            if (!playInEditorMode)
+                return Task.Delay(TimeSpan.FromMilliseconds(value));
+            else
+                return Task.Delay(TimeSpan.FromMilliseconds(value), token);
+
+            // else
+            // {
+
+            //     return null;//Task.CompletedTask;
+            // }
+        }
+        public static async void Wait(float time, Action waitEvent)
+        {
+            await WaitForSeconds(time, false);
+            waitEvent.Invoke();
+        }
+    }
+    public static class ListTools
+    {
+        public static T GetRandom<T>(this List<T> list)
+        {
+            if (list.Count == 0) return default;
+            return list[UnityEngine.Random.Range(0, list.Count() - 1)];
+        }
+        public static bool AddIfNotContains<T>(this List<T> list, T element)
+        {
+            if (!list.Contains(element))
+            {
+                list.Add(element);
+                return true;
+            }
+            return false;
+        }
+
+        public static Presenter<Data, View> Present<Data, View>(this List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : MonoBehaviour
+        {
+            var presenter = new Presenter<Data, View>();
+            presenter.Present(list, prefab, container, onShow);
+            return presenter;
         }
     }
     public static class SoundTools
@@ -64,7 +140,10 @@ namespace Tools
     }
     public static class GeometryTools
     {
-        public static Vector3 GetDirection(this Vector3 from, Vector3 to) => (to - from).normalized; 
+        public static Vector3 GetDirection(this Vector3 from, Vector3 to) => (to - from).normalized;
+        public static Vector3 WithZ(this Vector3 from, float z) => new Vector3(from.x, from.y, z);
+        public static Vector3 WithX(this Vector3 from, float x) => new Vector3(x, from.y, from.z);
+        public static Vector3 WithY(this Vector3 from, float y) => new Vector3(from.x, y, from.z);
         public static Vector2 GetDirection(this Vector2 from, Vector2 to) => (to - from).normalized;
     }
 }
@@ -80,10 +159,32 @@ public static class MonobehaviorTools
         if (c == null) c = component.gameObject.AddComponent<T>();
         return c;
     }
-    public static void OnClick(this Button button, Action onClick)
+    public static void OnClick(this Button button, Action onClick, bool clearOther = true)
     {
-        button?.onClick.RemoveAllListeners();
+        if (clearOther) button?.onClick.RemoveAllListeners();
         button?.onClick.AddListener(() => onClick?.Invoke());
+    }
+    public static void AddEvent(this EventTrigger trigger, EventTriggerType type, Action<BaseEventData> callBack)
+    {
+        var trig = trigger.triggers.Find(t => t.eventID == type);
+        if (trig == null)
+        {
+            trig = new EventTrigger.Entry() { eventID = type, callback = new EventTrigger.TriggerEvent() };
+            trigger.triggers.Add(trig);
+        }
+        trig.callback.AddListener((eventData) => callBack?.Invoke(eventData));
+    }
+    public static void ClearAllEvents(this EventTrigger trigger)
+    {
+        trigger.triggers.ForEach(t => t.callback.RemoveAllListeners());
+    }
+    public static void ClearEvents(this EventTrigger trigger, EventTriggerType type)
+    {
+        trigger.triggers.Find(t => t.eventID == type)?.callback.RemoveAllListeners();
+    }
+    public static void Move(this Transform transform, float x, float y, float z)
+    {
+        transform.position += new Vector3(x, y, z);
     }
 }
 namespace Tools.PlayerPrefs
@@ -148,9 +249,10 @@ namespace Tools.PlayerPrefs
 
 
         public static void DeleteKey(string key) => File.Delete(Patch + key);//UnityEngine.PlayerPrefs.DeleteKey(key);
-        public static void DeleteAll() => File.Delete(Patch);//UnityEngine.PlayerPrefs.DeleteAll();
+        // public static void DeleteAll() => File.Delete(Patch);//UnityEngine.PlayerPrefs.DeleteAll();
         public static bool HasKey(string key) => File.Exists(Patch + key);//UnityEngine.PlayerPrefs.HasKey(key);
     }
+    //TODO LOST DATAS. problem with float value, maybe problem in json
     public static class XORCipher
     {
         private static string GetRepeatKey(string s, int n)

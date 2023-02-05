@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tools;
 using UITools;
 using UnityEngine;
 using UnityEngine.Events;
@@ -79,7 +80,28 @@ namespace Tools
         public static T GetRandom<T>(this List<T> list)
         {
             if (list.Count == 0) return default;
-            return list[UnityEngine.Random.Range(0, list.Count() - 1)];
+            return list[UnityEngine.Random.Range(0, list.Count())];
+        }
+        public static List<T> GetRandoms<T>(this List<T> list, int count)
+        {
+            if (list.Count == 0) return default;
+            if (count > list.Count) count = list.Count;
+            return list.ToList().Shuffle().GetRange(0, count);
+        }
+        public static List<T> Shuffle<T>(this List<T> list)
+        {
+            if (list.Count == 0) return default;
+            for (int i = 0; i < list.Count; i++)
+            {
+                int j = UnityEngine.Random.Range(i, list.Count);
+                if (j != i)
+                {
+                    var temp = list[j];
+                    list[j] = list[i];
+                    list[i] = temp;
+                }
+            }
+            return list;
         }
         public static bool AddIfNotContains<T>(this List<T> list, T element)
         {
@@ -140,11 +162,15 @@ namespace Tools
     }
     public static class GeometryTools
     {
-        public static Vector3 GetDirection(this Vector3 from, Vector3 to) => (to - from).normalized;
+        public static Vector3 Direction(this Vector3 from, Vector3 to) => (to - from).normalized;
         public static Vector3 WithZ(this Vector3 from, float z) => new Vector3(from.x, from.y, z);
         public static Vector3 WithX(this Vector3 from, float x) => new Vector3(x, from.y, from.z);
         public static Vector3 WithY(this Vector3 from, float y) => new Vector3(from.x, y, from.z);
-        public static Vector2 GetDirection(this Vector2 from, Vector2 to) => (to - from).normalized;
+        public static Vector2 Direction(this Vector2 from, Vector2 to) => (to - from).normalized;
+        public static Vector2 WithX(this Vector2 from, float x) => new Vector2(x, from.y);
+        public static Vector2 WithY(this Vector2 from, float y) => new Vector2(from.x, y);
+        public static Vector3 ToVector3(this Vector2 vector) => new Vector3(vector.x, vector.y, 0);
+        public static Vector2 ToVector2(this Vector3 vector) => new Vector2(vector.x, vector.y);
     }
 }
 public static class MonobehaviorTools
@@ -185,6 +211,14 @@ public static class MonobehaviorTools
     public static void Move(this Transform transform, float x, float y, float z)
     {
         transform.position += new Vector3(x, y, z);
+    }
+    public static void Teleportation(this Transform transform, Vector3 position)
+    {
+        transform.position += position - transform.position;
+    }
+    public static void Teleportation(this Transform transform, Vector2 position)
+    {
+        transform.position += (Vector3)(position - new Vector2(transform.position.x, transform.position.y));
     }
 }
 namespace Tools.PlayerPrefs

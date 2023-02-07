@@ -38,7 +38,52 @@ namespace Tools
     {
         public static void InvokWithChance(Action action, int chance)
         {
+            if (chance == 0) return;
             if (UnityEngine.Random.Range(0, 100) <= chance) action?.Invoke();
+        }
+    }
+    public class TaskAwaiter
+    {
+        public bool isStopped, isPaused;
+        public Task WaitForSeconds(float seconds, int accuracy = 100)
+        {
+            return WaitForMilliseconds((long)seconds * 1000, accuracy);
+        }
+        public Task WaitForMilliseconds(long milliseconds, int accuracy = 100)
+        {
+            float timer = milliseconds;
+            if (timer <= Time.fixedDeltaTime) return TaskTools.WaitForMilliseconds(milliseconds);
+            return Task.Run(() =>
+            {
+                while (!isStopped && timer > 0)
+                {
+
+                    while (!isPaused && !isStopped && timer > 0)
+                    {
+                        timer -= accuracy;
+                        Thread.Sleep(accuracy);
+                    }
+
+                    if (isStopped) break;
+                    Thread.Sleep(accuracy);
+                }
+            });
+        }
+
+        public void Pause()
+        {
+            isPaused = true;
+        }
+
+        public void Resume()
+        {
+            isPaused = false;
+        }
+
+        public void Stop()
+        {
+            isPaused = true;
+            isStopped = true;
         }
     }
     public static class TaskTools
@@ -62,12 +107,6 @@ namespace Tools
                 return Task.Delay(TimeSpan.FromMilliseconds(value));
             else
                 return Task.Delay(TimeSpan.FromMilliseconds(value), token);
-
-            // else
-            // {
-
-            //     return null;//Task.CompletedTask;
-            // }
         }
         public static async void Wait(float time, Action waitEvent)
         {

@@ -35,17 +35,20 @@ namespace Game.CodeTools
                 }
             }
         }
-        public Action<T> OnChanged(Action<T> onChangedEvent)
+        public void SubscribeAndInvoke(Action<T> onChangedEvent)
+        {
+            onChangedEvent.Invoke(_value);
+            Subscribe(onChangedEvent);
+        }
+        public void Subscribe(Action<T> onChangedEvent)
         {
             actionWithValue.Add(onChangedEvent);
-            return onChangedEvent;
         }
-        public Action OnChanged(Action onChangedEvent)
+        public void Subscribe(Action onChangedEvent)
         {
             actionWithoutValue.Add(onChangedEvent);
-            return onChangedEvent;
         }
-        public void DisconnectAll()
+        public void UnsubscribeAll()
         {
             actionWithoutValue.Clear();
             actionWithValue.Clear();
@@ -58,7 +61,7 @@ namespace Game.CodeTools
         public static void ConnectToSaverByKey<T>(this Reactive<T> reactive, string saveKey) where T : new()
         {
             reactive.value = reactive.GetSave(nameof(saveKey)).value;
-            reactive.OnChanged(() => reactive.Save(nameof(saveKey)));
+            reactive.Subscribe(() => reactive.Save(nameof(saveKey)));
         }
         public static void Save<T>(this Reactive<T> reactive, string saveKey) where T : new()
         {

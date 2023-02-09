@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 namespace Tools.PlayerPrefs
@@ -9,21 +10,21 @@ namespace Tools.PlayerPrefs
     public static class PlayerPrefsPro
     {
         private const string SAVE_KEY = "MJN3S";
-        private static string GetSimpleKey<T>(string key) => (key);
-        private static string GetCryptoKey<T>(string key) => GetSimpleKey<T>(key);//.Encrypt(SAVE_KEY);
+        private static string GetKey(string key) => key;
         public static string Patch => Application.persistentDataPath + "/" + SAVE_KEY;
-        public static void Set<T>(string key, T obj)
+        public static void Set<T>(string key, T obj) => Set<T>(key, obj, true);
+        private static void Set<T>(string key, T obj, bool saveKey)
         {
-            var secretKey = GetCryptoKey<T>(key);
+            var secretKey = GetKey(key);
             SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), secretKey);
-            // UnityEngine.PlayerPrefs.SetString(secretKey, JsonUtility.ToJson(new Json<T>(obj)));//.Encrypt(secretKey));
+            if (saveKey) SetNewKey(secretKey);
         }
         public static T Get<T>(string key)
         {
-            var secretKey = GetCryptoKey<T>(key);
+            var secretKey = GetKey(key);
             var bytes = GetBytes(secretKey);
 
-            string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);//UnityEngine.PlayerPrefs.GetString(secretKey);//.Decrypt(secretKey);
+            string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
             if (String.IsNullOrEmpty(json)) return default;
             // if(json[json.Length - 1] != '}') json += '}';
             return JsonUtility.FromJson<Json<T>>(json).value;
@@ -46,7 +47,7 @@ namespace Tools.PlayerPrefs
             public T value;
         }
 
-        public static void SetSprite(string key, Sprite sprite) => File.WriteAllBytes(Application.persistentDataPath + SAVE_KEY + key, sprite.texture.EncodeToPNG());
+        public static void SetSprite(string key, Sprite sprite) => File.WriteAllBytes(Patch + key, sprite.texture.EncodeToPNG());
         public static void SetFloat(string key, float value) => Set(key, value);
         public static void SetInt(string key, int value) => Set(key, value);
         public static void SetString(string key, string value) => Set(key, value);
@@ -64,41 +65,32 @@ namespace Tools.PlayerPrefs
         public static int GetInt(string key) => Get<int>(key);
         public static string GetString(string key) => Get<string>(key);
 
+        public static bool HasKey(string key) => File.Exists(Patch + key);
 
-        public static void DeleteKey(string key) => File.Delete(Patch + key);//UnityEngine.PlayerPrefs.DeleteKey(key);
-        // public static void DeleteAll() => File.Delete(Patch);//UnityEngine.PlayerPrefs.DeleteAll();
-        public static bool HasKey(string key) => File.Exists(Patch + key);//UnityEngine.PlayerPrefs.HasKey(key);
-    }
-    //TODO LOST DATAS. problem with float value, maybe problem in json
-    public static class XORCipher
-    {
-        private static string GetRepeatKey(string s, int n)
+        private static List<string> GetAllKeys()
         {
-            var r = s;
-            while (r.Length < n)
-            {
-                r += r;
-            }
-
-            return r.Substring(0, n);
+            return Get<List<string>>(SAVE_KEY + "_ALL_KEYS");
         }
-
-        private static string Cipher(string text, string secretKey)
+        private static void SetNewKey(string newKey)
         {
-            if (String.IsNullOrEmpty(text)) return text;
-            var currentKey = GetRepeatKey(secretKey, text.Length);
-            var res = string.Empty;
-            for (var i = 0; i < text.Length; i++)
-            {
-                res += ((char)(text[i] ^ currentKey[i])).ToString();
-            }
-
-            return res;
+            var keys = GetAllKeys();
+            if (keys == null) keys = new List<string>();
+            if (keys.Contains(newKey)) return;
+            keys.Add(newKey);
+            Set<List<string>>(SAVE_KEY + "_ALL_KEYS", keys, false);
         }
-        public static string Encrypt(this string plainText, string password)
-            => Cipher(plainText, password);
-        public static string Decrypt(this string encryptedText, string password)
-            => Cipher(encryptedText, password);
+        public static void DeleteKey(string key)
+        {
+            if (!HasKey(key)) return;
+            var keys = GetAllKeys();
+            File.Delete(Patch + keys.Find(k => k == GetKey(key)));
+            Set<List<string>>(SAVE_KEY + "_ALL_KEYS", keys, false);
+        }
+        [MenuItem("PlayerPrefsPro/Clear")]
+        public static void DeleteAllKeys()
+        {
+            GetAllKeys()?.ForEach(key => File.Delete(Patch + GetKey(key)));
+            Set<List<string>>(SAVE_KEY + "_ALL_KEYS", new List<string>(), false);
+        }
     }
 }
-

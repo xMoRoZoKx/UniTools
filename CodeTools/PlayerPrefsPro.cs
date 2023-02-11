@@ -9,6 +9,14 @@ namespace Tools.PlayerPrefs
 {
     public static class PlayerPrefsPro
     {
+        private class Json<T>
+        {
+            public Json(T value)
+            {
+                this.value = value;
+            }
+            public T value;
+        }
         private const string SAVE_KEY = "MJN3S";
         private static string GetKey(string key) => key;
         public static string Patch => Application.persistentDataPath + "/" + SAVE_KEY;
@@ -37,14 +45,6 @@ namespace Tools.PlayerPrefs
         {
             if (!HasKey(key)) return null;
             return File.ReadAllBytes(Patch + key);
-        }
-        private class Json<T>
-        {
-            public Json(T value)
-            {
-                this.value = value;
-            }
-            public T value;
         }
 
         public static void SetSprite(string key, Sprite sprite) => File.WriteAllBytes(Patch + key, sprite.texture.EncodeToPNG());

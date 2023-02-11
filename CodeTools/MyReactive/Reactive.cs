@@ -48,7 +48,7 @@ namespace Game.CodeTools
             }
             actionsAndKeys.Add((onChangedEvent, key));
         }
-        public void Subscribe(Action<T> onChangedEvent) => SubscribeWithKey(onChangedEvent, actionsAndKeys.Count.ToString());
+        public void Subscribe(Action<T> onChangedEvent) => SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
         public void Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void Unsubscribe(string key)
         {

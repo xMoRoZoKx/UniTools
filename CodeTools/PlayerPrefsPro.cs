@@ -86,7 +86,9 @@ namespace Tools.PlayerPrefs
             File.Delete(Patch + keys.Find(k => k == GetKey(key)));
             Set<List<string>>(SAVE_KEY + "_ALL_KEYS", keys, false);
         }
+#if UNITY_EDITOR
         [MenuItem("PlayerPrefsPro/Clear")]
+#endif
         public static void DeleteAllKeys()
         {
             GetAllKeys()?.ForEach(key => File.Delete(Patch + GetKey(key)));

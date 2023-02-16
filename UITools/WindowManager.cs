@@ -6,18 +6,20 @@ using UnityEngine;
 
 namespace Game.UI
 {
+    [RequireComponent(typeof(Canvas))]
     public class WindowManager : MonoBehaviour
     {
         public static WindowManager instance;
         public Transform root;
-        // [SerializeField] private WindowsSO windowsSO;
-        private List<WindowBase> windows;//windowsSO.windows;
+        public Canvas canvas { get; private set; }
+        private List<WindowBase> windows;
         private List<WindowBase> shownWindows = new List<WindowBase>();
         private void Awake()
         {
             if (instance == null)
             {
                 instance = this;
+                canvas = GetComponent<Canvas>();
                 windows = Resources.LoadAll<WindowBase>("").ToList();
                 DontDestroyOnLoad(this);
             }

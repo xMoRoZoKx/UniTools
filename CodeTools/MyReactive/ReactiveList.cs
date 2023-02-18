@@ -2,7 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
+using UnityEngine;
+
 namespace Game.CodeTools
 {
     [System.Serializable]
@@ -15,7 +18,8 @@ namespace Game.CodeTools
     public class ReactiveList<T> : List<T>, IReactiveCollection<T>
     {
         private List<T> _list = new List<T>();
-        private EventController<(T, ReactiveCollectionEventType)> _events = new EventController<(T, ReactiveCollectionEventType)>();
+        private EventController<(T, ReactiveCollectionEventType)> _eventsForEach = new EventController<(T, ReactiveCollectionEventType)>();
+        List<(Action<List<T>>, string)> actionsAndKeys = new List<(Action<List<T>>, string)>();
 
         public new T this[int index]
         {
@@ -24,7 +28,7 @@ namespace Game.CodeTools
             {
                 if (value.GetHashCode() != _list[index].GetHashCode())
                 {
-                    _events.Invoke((value, ReactiveCollectionEventType.Replace));
+                    _eventsForEach.Invoke((value, ReactiveCollectionEventType.Replace));
                     _list[index] = value;
                 }
             }
@@ -36,21 +40,16 @@ namespace Game.CodeTools
         public bool IsSynchronized => false;
 
         public bool IsFixedSize => false;
-
-        public void Subscribe(Action<T, ReactiveCollectionEventType> onChangeElement)
-        {
-            _events.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
-        }
         public new void Add(T item)
         {
-            _events.Invoke((item, ReactiveCollectionEventType.Add));
+            _eventsForEach.Invoke((item, ReactiveCollectionEventType.Add));
             _list.Add(item);
         }
         public new void Clear()
         {
             for (int i = 0; i < _list.Count; i++)
             {
-                _events.Invoke((_list[0], ReactiveCollectionEventType.Remove));
+                _eventsForEach.Invoke((_list[0], ReactiveCollectionEventType.Remove));
                 RemoveAt(0);
             }
         }
@@ -64,7 +63,7 @@ namespace Game.CodeTools
 
         public new void Insert(int index, T item)
         {
-            _events.Invoke((item, ReactiveCollectionEventType.Replace));
+            _eventsForEach.Invoke((item, ReactiveCollectionEventType.Replace));
             _list.Insert(index, item);
         }
 
@@ -72,7 +71,7 @@ namespace Game.CodeTools
         {
             if (_list.Remove(item))
             {
-                _events.Invoke((item, ReactiveCollectionEventType.Remove));
+                _eventsForEach.Invoke((item, ReactiveCollectionEventType.Remove));
                 return true;
             }
             return false;
@@ -80,15 +79,48 @@ namespace Game.CodeTools
 
         public new void RemoveAt(int index)
         {
-            _events.Invoke((_list[index], ReactiveCollectionEventType.Remove));
+            _eventsForEach.Invoke((_list[index], ReactiveCollectionEventType.Remove));
             _list.RemoveAt(index);
         }
 
 
         IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
+
+
+        public void SubscribeForEach(Action<T, ReactiveCollectionEventType> onChangeElement)
+        {
+            _eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
+        }
+
+        public List<T> GetValue() => _list;
+
+        public void SetValue(List<T> value)
+        {
+            _list = value;
+        }
+
+        public void SubscribeAndInvoke(Action<List<T>> onChangedEvent)
+        {
+            onChangedEvent.Invoke(_list);
+            this.Subscribe(onChangedEvent);
+        }
+        public void SubscribeWithKey(Action<List<T>> onChangedEvent, string key)
+        {
+            if (actionsAndKeys.Any(act => act.Item2 == key))
+            {
+                Debug.LogError("this key exist!");
+                return;
+            }
+            actionsAndKeys.Add((onChangedEvent, key));
+        }
+
+        public void Unsubscribe(string key) => actionsAndKeys.RemoveAll(act => act.Item2 == key);
+        public void UnsubscribeAll() => actionsAndKeys.Clear();
+        public void Subscribe(Action<List<T>> onChangedEvent) => SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
+        public void Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
     }
-    public interface IReactiveCollection<T> : ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
+    public interface IReactiveCollection<T> : IReactive<List<T>>, ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
     {
-        public void Subscribe(Action<T, ReactiveCollectionEventType> onChangeElement);
+        public void SubscribeForEach(Action<T, ReactiveCollectionEventType> onChangeElement);
     }
 }

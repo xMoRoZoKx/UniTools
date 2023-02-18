@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.CodeTools
 {
     [System.Serializable]
-    public class Reactive<T>
+    public class Reactive<T> : IReactive<T>
     {
         public Reactive()
         {
@@ -58,41 +58,58 @@ namespace Game.CodeTools
         {
             actionsAndKeys.Clear();
         }
-    }
 
+        public T GetValue() => value;
+
+        public void SetValue(T value)
+        {
+            this.value = value;
+        }
+    }
+    public interface IReactive<T>
+    {
+        public T GetValue();
+        public void SetValue(T value);
+        public void SubscribeAndInvoke(Action<T> onChangedEvent);
+        public void SubscribeWithKey(Action<T> onChangedEvent, string key);
+        public void Subscribe(Action<T> onChangedEvent) => SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
+        public void Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
+        public void Unsubscribe(string key);
+        public void UnsubscribeAll();
+    }
     public static class ReactiveUtils
     {
         //SAVES UTILS
-        public static void ConnectToSaver<T>(this Reactive<T> reactive, string saveKey) where T : new()
+        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
-            reactive.value = reactive.GetSave(saveKey).value;
+            reactive.SetValue(reactive.GetSave(saveKey).GetValue());
             reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
         }
-        public static void DisonnectSaver<T>(this Reactive<T> reactive, string saveKey) where T : new()
+        public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
             reactive.Unsubscribe(saveKey);
         }
-        public static void Save<T>(this Reactive<T> reactive, string saveKey) where T : new()
+        public static void Save<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
-            PlayerPrefsPro.Set(saveKey, reactive.value);
+            PlayerPrefsPro.Set(saveKey, reactive.GetValue());
         }
-        public static Reactive<T> GetSave<T>(this Reactive<T> reactive, string saveKey) where T : new()
+        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
             if (reactive == null) return reactive;
-            reactive.value = PlayerPrefsPro.Get<T>(saveKey);
+            reactive.SetValue(PlayerPrefsPro.Get<T>(saveKey));
             return reactive;
         }
         //JSON UTILS
-        public static string ToJson<T>(this Reactive<T> reactive)
+        public static string ToJson<T>(this IReactive<T> reactive)
         {
-            return JsonUtility.ToJson(new ReactiveJsonValue<T>(reactive.value));
+            return JsonUtility.ToJson(new ReactiveJsonValue<T>(reactive.GetValue()));
         }
-        public static Reactive<T> FromJson<T>(this Reactive<T> reactive, string json)
+        public static IReactive<T> FromJson<T>(this IReactive<T> reactive, string json)
         {
             if (reactive == null) reactive = new Reactive<T>();
             Debug.LogError(json);
             var fromJson = JsonUtility.FromJson<ReactiveJsonValue<T>>(json);
-            if (fromJson != null) reactive.value = fromJson.Value;
+            if (fromJson != null) reactive.SetValue(fromJson.Value);
             return reactive;
         }
         [System.Serializable]

@@ -17,59 +17,45 @@ namespace Game.CodeTools
     }
     public class ReactiveList<T> : List<T>, IReactiveCollection<T>
     {
-        private List<T> _list = new List<T>();
+        // private List<T> _list = new List<T>();
         private EventController<(T, ReactiveCollectionEventType)> _eventsForEach = new EventController<(T, ReactiveCollectionEventType)>();
         List<(Action<List<T>>, string)> actionsAndKeys = new List<(Action<List<T>>, string)>();
 
         public new T this[int index]
         {
-            get => _list[index];
+            get => this[index];
             set
             {
-                if (value.GetHashCode() != _list[index].GetHashCode())
+                if (value.GetHashCode() != base[index].GetHashCode())
                 {
                     _eventsForEach.Invoke((value, ReactiveCollectionEventType.Replace));
-                    _list[index] = value;
+                    base[index] = value;
                 }
             }
         }
-
-        public new int Count => _list.Count;
-
-        public bool IsReadOnly => false;
-        public bool IsSynchronized => false;
-
-        public bool IsFixedSize => false;
         public new void Add(T item)
         {
             _eventsForEach.Invoke((item, ReactiveCollectionEventType.Add));
-            _list.Add(item);
+            base.Add(item);
         }
         public new void Clear()
         {
-            for (int i = 0; i < _list.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                _eventsForEach.Invoke((_list[0], ReactiveCollectionEventType.Remove));
+                _eventsForEach.Invoke((base[0], ReactiveCollectionEventType.Remove));
                 RemoveAt(0);
             }
         }
 
-        public new bool Contains(T item) => _list.Contains(item);
-
-        public new void CopyTo(T[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
-
-        public new IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
-        public new int IndexOf(T item) => _list.IndexOf(item);
-
         public new void Insert(int index, T item)
         {
             _eventsForEach.Invoke((item, ReactiveCollectionEventType.Replace));
-            _list.Insert(index, item);
+            base.Insert(index, item);
         }
 
         public new bool Remove(T item)
         {
-            if (_list.Remove(item))
+            if (base.Remove(item))
             {
                 _eventsForEach.Invoke((item, ReactiveCollectionEventType.Remove));
                 return true;
@@ -79,12 +65,9 @@ namespace Game.CodeTools
 
         public new void RemoveAt(int index)
         {
-            _eventsForEach.Invoke((_list[index], ReactiveCollectionEventType.Remove));
-            _list.RemoveAt(index);
+            _eventsForEach.Invoke((base[index], ReactiveCollectionEventType.Remove));
+            base.RemoveAt(index);
         }
-
-
-        IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
 
 
         public void SubscribeForEach(Action<T, ReactiveCollectionEventType> onChangeElement)
@@ -92,16 +75,17 @@ namespace Game.CodeTools
             _eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
         }
 
-        public List<T> GetValue() => _list;
+        public List<T> GetValue() => this;
 
         public void SetValue(List<T> value)
         {
-            _list = value;
+            this.Clear();
+            value?.ForEach(v => Add(v));
         }
 
         public void SubscribeAndInvoke(Action<List<T>> onChangedEvent)
         {
-            onChangedEvent.Invoke(_list);
+            onChangedEvent.Invoke(this);
             this.Subscribe(onChangedEvent);
         }
         public void SubscribeWithKey(Action<List<T>> onChangedEvent, string key)

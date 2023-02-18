@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class EventController<T>
 {
-    List<Action<T>> actions;
+    List<Action<T>> actions = new List<Action<T>>();
     public void Subscribe(Action<T> action)
     {
-
+        actions.Add(action);
     }
     public void Invoke(T value)
     {

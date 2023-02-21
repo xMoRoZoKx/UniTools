@@ -82,7 +82,7 @@ namespace Game.CodeTools
         //SAVES UTILS
         public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
-            reactive.SetValue(reactive.GetSave(saveKey).GetValue());
+            reactive.GetSave(saveKey);
             reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
         }
         public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
@@ -91,6 +91,7 @@ namespace Game.CodeTools
         }
         public static void Save<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
+            var val = reactive.GetValue();
             PlayerPrefsPro.Set(saveKey, reactive.GetValue());
         }
         public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey) where T : new()

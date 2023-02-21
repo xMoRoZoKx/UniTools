@@ -15,7 +15,7 @@ namespace Game.CodeTools
         Add,
         Replace
     }
-    public class ReactiveList<T> : List<T>, IReactiveCollection<T>
+    public class ReactiveList<T> : List<T>, IReactiveCollection<T>, IReactive<List<T>>
     {
         // private List<T> _list = new List<T>();
         private EventController<(T, ReactiveCollectionEventType)> _eventsForEach = new EventController<(T, ReactiveCollectionEventType)>();
@@ -28,36 +28,49 @@ namespace Game.CodeTools
             {
                 if (value.GetHashCode() != base[index].GetHashCode())
                 {
-                    _eventsForEach.Invoke((value, ReactiveCollectionEventType.Replace));
                     base[index] = value;
+                    InvokeElementEvents(value, ReactiveCollectionEventType.Add);
+                    InvokeListEvents();
                 }
             }
         }
+        private void InvokeListEvents()
+        {
+            actionsAndKeys.ForEach(actAndKey => actAndKey.Item1.Invoke(this));
+        }
+        private void InvokeElementEvents(T value, ReactiveCollectionEventType type)
+        {
+            _eventsForEach.Invoke((value, type));
+        }
         public new void Add(T item)
         {
-            _eventsForEach.Invoke((item, ReactiveCollectionEventType.Add));
             base.Add(item);
+            InvokeElementEvents(item, ReactiveCollectionEventType.Add);
+            InvokeListEvents();
         }
         public new void Clear()
         {
             for (int i = 0; i < Count; i++)
             {
-                _eventsForEach.Invoke((base[0], ReactiveCollectionEventType.Remove));
                 RemoveAt(0);
+                InvokeElementEvents(base[0], ReactiveCollectionEventType.Remove);
+                InvokeListEvents();
             }
         }
 
         public new void Insert(int index, T item)
         {
-            _eventsForEach.Invoke((item, ReactiveCollectionEventType.Replace));
             base.Insert(index, item);
+            InvokeElementEvents(base[index], ReactiveCollectionEventType.Replace);
+            InvokeListEvents();
         }
 
         public new bool Remove(T item)
         {
             if (base.Remove(item))
             {
-                _eventsForEach.Invoke((item, ReactiveCollectionEventType.Remove));
+                InvokeElementEvents(item, ReactiveCollectionEventType.Remove);
+                InvokeListEvents();
                 return true;
             }
             return false;
@@ -65,7 +78,8 @@ namespace Game.CodeTools
 
         public new void RemoveAt(int index)
         {
-            _eventsForEach.Invoke((base[index], ReactiveCollectionEventType.Remove));
+            InvokeElementEvents(base[index], ReactiveCollectionEventType.Remove);
+            InvokeListEvents();
             base.RemoveAt(index);
         }
 
@@ -103,7 +117,7 @@ namespace Game.CodeTools
         public void Subscribe(Action<List<T>> onChangedEvent) => SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
         public void Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
     }
-    public interface IReactiveCollection<T> : IReactive<List<T>>, ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
+    public interface IReactiveCollection<T> : ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
     {
         public void SubscribeForEach(Action<T, ReactiveCollectionEventType> onChangeElement);
     }

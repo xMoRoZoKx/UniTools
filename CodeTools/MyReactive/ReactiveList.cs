@@ -23,7 +23,7 @@ namespace Game.CodeTools
 
         public new T this[int index]
         {
-            get => this[index];
+            get => base[index];
             set
             {
                 if (value.GetHashCode() != base[index].GetHashCode())

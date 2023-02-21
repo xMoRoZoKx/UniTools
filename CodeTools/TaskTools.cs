@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class TaskTools
 {
-    public class TaskWaiting
+    public class TaskController
     {
         public bool IsPaused { get; private set; }
         public bool IsStopped { get; private set; }
@@ -60,26 +60,9 @@ public static class TaskTools
             IsStopped = true;
         }
     }
-    static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-    static CancellationToken token = cancelTokenSource.Token;
-    public static Task WaitForSeconds(float value, bool playInEditorMode = true)
-    {
-        return WaitForMilliseconds((long)value * 1000);
-    }
-
-    public static Task WaitForMilliseconds(long value, bool playInEditorMode = true)
-    {
-        if (!Application.isPlaying)
-        {
-            cancelTokenSource.Cancel();
-            cancelTokenSource.Dispose();
-            return null;
-        }
-        if (!playInEditorMode)
-            return Task.Delay(TimeSpan.FromMilliseconds(value));
-        else
-            return Task.Delay(TimeSpan.FromMilliseconds(value), token);
-    }
+    public static TaskController taskController;
+    public static Task WaitForSeconds(float value, bool playInEditorMode = true) => WaitForMilliseconds((long)value * 1000);
+    public static Task WaitForMilliseconds(long value, bool playInEditorMode = true) => taskController.WaitForMilliseconds(value);
     public static async void Wait(float time, Action waitEvent)
     {
         await WaitForSeconds(time, false);

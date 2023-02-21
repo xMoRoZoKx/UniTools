@@ -13,5 +13,10 @@ public class EventController<T>
     public void Invoke(T value)
     {
         actions.ForEach(a => a.Invoke(value));
+    } 
+    public static EventController<T> operator +(EventController<T> a, Action<T> b)
+    {
+        a.Subscribe(b);
+        return a;
     }
 }

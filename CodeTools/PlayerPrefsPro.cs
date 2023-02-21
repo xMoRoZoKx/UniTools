@@ -24,7 +24,6 @@ namespace Tools.PlayerPrefs
         private static void Set<T>(string key, T obj, bool saveKey)
         {
             var secretKey = GetKey(key);
-            Debug.LogError(JsonUtility.ToJson(new Json<T>(obj)));
             SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), secretKey);
             if (saveKey) SetNewKey(secretKey);
         }

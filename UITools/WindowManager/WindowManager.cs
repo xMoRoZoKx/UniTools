@@ -52,9 +52,9 @@ namespace Game.UI
         private T CreateView<T>(T windowPrefab) where T : WindowBase
         {
             var window = Instantiate(windowPrefab, root);
+            // window.gameObject.SetActive(true);
             window.OnOpened();
             window.ShowAnimation();
-            window.gameObject.SetActive(true);
             shownWindows.Add(window);
             return (T)window;
         }

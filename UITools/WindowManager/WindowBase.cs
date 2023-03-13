@@ -17,6 +17,7 @@ namespace Game.UI
         private void Awake()
         {
             closeButton?.onClick.AddListener(Close);
+            animator.Init(transform);
         }
         public void Close()
         {
@@ -24,13 +25,17 @@ namespace Game.UI
         }
         public virtual float ShowAnimation(Action onCompleted = null)
         {
-            animator.StartAnimation(false, () => gameObject.SetActive(true));
-            return 0;
+            animator.StartShowAnimation(() =>
+            {
+                gameObject.SetActive(true);
+                onCompleted?.Invoke();
+            });
+            return animator.duration;
         }
         public virtual float CloseAnimation(Action onCompleted = null)
         {
-            animator.StartAnimation(true);
-            return 0;
+            animator.StartHideAnimation(onCompleted);
+            return animator.duration;
         }
         public virtual void OnOpened()
         {

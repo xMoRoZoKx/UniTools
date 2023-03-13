@@ -3,173 +3,124 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DG.Tweening;
+using Tools;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Game.UI
 {
-    //TODO old code base
     [System.Serializable]
     public class WindowAnimator
     {
-
-        public float time = 0.5f;
-        public float period = 0f;
-        [SerializeField] private List<Transform> animateObject;
-        private List<ObjectData> _animateObjectData = new List<ObjectData>();
-        private bool _haveState = false;
-        [Space]
-        [Header("SCALE")]
-        [SerializeField] private bool scaleType;
-        [SerializeField][Range(0, 1000)] private float size = 1000;
-        [SerializeField] private bool boomAnimation;
-        [SerializeField] private float boomAnimationForce = 0.1f;
-        [SerializeField] private float boomAnimationTime = 0.1f;
-        [Header("MOVE")]
-        [SerializeField] private bool moveType;
-        [SerializeField] private Vector3 displacement;
-
-        [Space]
-        private bool _animateStation = true;
-        private bool _animationStarted;
-        public WindowAnimator StartAnimation(bool isReverse = false, Action onCompleted = null)
+        public float duration = 0.2f;
+        [SerializeField] private float period = 0f;
+        [SerializeField] private bool useFade = true;
+        [SerializeField] private List<AnimatedObject> animateObjects;
+        [SerializeField] private AnimationSettings defaultSettings;
+        private CanvasGroup _canvasGroup;
+        public CanvasGroup canvasGroup
         {
-            foreach (var obj in animateObject)
+            get
             {
-                obj.DOKill();
-            }
-            RememberStartState();
-            ResetState();
-            StartAnimator(isReverse, onCompleted);
-            return this;
-        }
-        private void RememberStartState()
-        {
-            if (_haveState) return;
-            _haveState = true;
-            foreach (var obj in animateObject)
-            {
-                _animateObjectData.Add(new ObjectData(obj.localScale, obj.localPosition));
-            }
-        }
-        private void ResetState()
-        {
-            for (int i = 0; i < _animateObjectData.Count; i++)
-            {
-                animateObject[i].localPosition = _animateObjectData[i].Position;
-                animateObject[i].localScale = _animateObjectData[i].Scale;
-            }
-        }
-        private async void StartAnimator(bool isReverse, Action onCompleted)
-        {
-            for (int i = 0; i < animateObject.Count && !isReverse; i++)
-            {
-                if (scaleType) animateObject[i].localScale = animateObject[i].localScale / this.size;
-                if (moveType) animateObject[i].localPosition += this.displacement;
-            }
-            var size = this.size;
-            var displacement = this.displacement;
-            if (isReverse)
-            {
-                displacement *= -1;
-            }
-
-            for (int i = 0; i < animateObject.Count; i++)
-            {
-                if (scaleType)
+                if (root == null)
                 {
-                    var scale = animateObject[i].localScale * size;
-                    if (isReverse) scale = animateObject[i].localScale / size;
-                    if (!boomAnimation || isReverse) animateObject[i].DOScale(scale, time);
-                    else
-                    {
-                        animateObject[i].DOScale(scale * (boomAnimationForce + 1), time + boomAnimationTime);
-                        EndBoomAnimation(i);
-                    }
+                    Debug.LogError("Need itin animator");
+                    return null;
                 }
-                if (moveType)
-                    animateObject[i].DOLocalMove(animateObject[i].localPosition - displacement, time);
-
-                if (i < animateObject.Count - 1 && period > 0) await Task.Delay(TimeSpan.FromSeconds(period));
-                else if (period > 0) await Task.Delay(TimeSpan.FromSeconds(time + 0.1f));
+                if (_canvasGroup == null) _canvasGroup = root.GetOrAddCommponent<CanvasGroup>();
+                return _canvasGroup;
             }
+        }
+        private Transform root;
+        public void Init(Transform root)
+        {
+            this.root = root;
+        }
+        public void StartShowAnimation(Action onCompleted = null) => StartAnimation(true, onCompleted);
+        public void StartHideAnimation(Action onCompleted = null) => StartAnimation(false, onCompleted);
+        private async void StartAnimation(bool isShowing, Action onCompleted = null)
+        {
+            animateObjects.ForEach(ao =>
+            {
+                if (isShowing) ao.StartShowAnimation(duration, defaultSettings);
+                else ao.StartHideAnimation(duration, defaultSettings);
+            });
+            canvasGroup.interactable = false;
+            if (useFade)
+            {
+                canvasGroup.alpha = isShowing ? 0 : 1;
+                canvasGroup.DOFade(isShowing ? 1 : 0, duration);
+            }
+            await TaskTools.WaitForSeconds(duration);
+            canvasGroup.interactable = true;
             onCompleted?.Invoke();
-            _animationStarted = false;
         }
-
-        private async void EndBoomAnimation(int id)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(time + boomAnimationTime));
-            animateObject[id].DOScale(animateObject[id].localScale / (boomAnimationForce + 1), boomAnimationTime);
-        }
-
-        public bool activeStaticAnimation = false;
-        public void StartStaticAnimation()
-        {
-
-            activeStaticAnimation = true;
-            if (_animateStation)
-            {
-                for (int i = 0; i < animateObject.Count; i++)
-                {
-                    if (moveType)
-                        animateObject[i].DOLocalMove(animateObject[i].localPosition + displacement, time).OnComplete(() =>
-                        {
-                            activeStaticAnimation = false;
-                        });
-                }
-
-                _animateStation = false;
-            }
-            else
-            {
-                EndStaticAnimation();
-            }
-        }
-
-        public void ResetStaticAnimation(Vector3 position)
-        {
-            for (int i = 0; i < animateObject.Count; i++)
-            {
-                if (moveType)
-                {
-                    _animateStation = true;
-                    animateObject[i].DOKill();
-                    animateObject[i].localPosition = position;
-                }
-            }
-        }
-        private void EndStaticAnimation()
-        {
-            if (!_animateStation)
-            {
-                for (int i = 0; i < animateObject.Count; i++)
-                {
-                    if (moveType)
-                        animateObject[i].DOLocalMove(animateObject[i].localPosition - displacement, time).OnComplete(() =>
-                        {
-                            activeStaticAnimation = false;
-                        });
-                }
-
-                _animateStation = true;
-            }
-            else
-            {
-                StartStaticAnimation();
-            }
-        }
-
     }
-    public class ObjectData
+    public class StateData
     {
-        public ObjectData(Vector3 scale, Vector3 position)
+        public StateData(Vector3 scale, Vector3 position)
         {
             Scale = scale;
             Position = position;
         }
+        public StateData()
+        {
+
+        }
         public Vector3 Scale;
         public Vector3 Position;
+    }
+    [System.Serializable]
+    public class AnimationSettings
+    {
+        public Vector3 displacement;
+        public float scaleForce = 0;
+        public bool useBoomScale;
+    }
+    [System.Serializable]
+    public class AnimatedObject
+    {
+        public Transform transform;
+        public bool useDefaultSettings = true;
+        public AnimationSettings settings = new AnimationSettings();
+        private StateData startState;
+        public void StartShowAnimation(float duration, AnimationSettings defaultSettings = null)
+        {
+            transform.DOKill();
+
+            if (useDefaultSettings && defaultSettings != null) settings = defaultSettings;
+
+            if (startState == null) startState = new StateData(transform.localScale, transform.position);
+
+            if (settings.scaleForce != 0)
+            {
+                transform.localScale = startState.Scale / settings.scaleForce;
+                if (!settings.useBoomScale) transform.DOScale(startState.Scale, duration);
+                else
+                {
+                    const float boomForce = 1.02f;
+                    const float boomTime = 0.1f;
+                    transform.DOScale(startState.Scale * boomForce, duration - boomTime).OnComplete(() => transform.DOScale(startState.Scale / boomForce, boomTime));
+                }
+            }
+
+            transform.localPosition = startState.Position + settings.displacement;
+            transform.DOMove(startState.Position, duration);
+        }
+        public void StartHideAnimation(float duration, AnimationSettings defaultSettings = null)
+        {
+            transform.DOKill();
+
+            if (startState == null) startState = new StateData(transform.localScale, transform.position);
+
+            if (useDefaultSettings && defaultSettings != null) settings = defaultSettings;
+
+            transform.position = startState.Position;
+            transform.localScale = startState.Scale;
+
+            if (settings.scaleForce != 0) transform.DOScale(startState.Scale / settings.scaleForce, duration);//.OnComplete(() => transform.localScale = startState.Scale);
+            transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
+        }
     }
 }

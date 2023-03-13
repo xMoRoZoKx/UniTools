@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Game.CodeTools;
 using UITools;
 using UnityEngine;
 
@@ -56,6 +57,10 @@ namespace Tools
         public static Presenter<Data, View> Present<Data, View>(this List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : MonoBehaviour
         {
             var presenter = new Presenter<Data, View>();
+            if (list is ReactiveList<Data> reactiveList)
+            {
+                reactiveList.Subscribe(data => presenter.Present(data, prefab, container, onShow));
+            }
             presenter.Present(list, prefab, container, onShow);
             return presenter;
         }

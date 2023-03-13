@@ -25,7 +25,7 @@ namespace Game.UI
             }
             else Destroy(gameObject);
         }
-        public T Show<T>(Action onClose = null) where T : WindowBase
+        public T Show<T>() where T : WindowBase
         {
             var window = shownWindows.Find(w => w is T);
             var windowPrefab = windows.Find(w => w is T);
@@ -36,17 +36,24 @@ namespace Game.UI
             };
             if (window && windowPrefab.isReusableView)
             {
-                GetOpenedWindow<T>()?.Close();
-                window.gameObject.SetActive(true);
-                window.transform.SetSiblingIndex(root.childCount - 1);
-                window.OnOpened();
-                window.animator.StartAnimation(false, () => window.gameObject.SetActive(true));
-                return (T)window;
+                return ShowExistView((T)window);
             }
-            window = Instantiate(windowPrefab, root);
+            return CreateView((T)windowPrefab);
+        }
+        private T ShowExistView<T>(T window) where T : WindowBase
+        {
+            GetOpenedWindow<T>()?.Close();
+            window.gameObject.SetActive(true);
+            window.transform.SetSiblingIndex(root.childCount - 1);
             window.OnOpened();
-            window.onClose.AddListener(() => onClose?.Invoke());
-            window.animator.StartAnimation(false, () => window.gameObject.SetActive(true));
+            window.ShowAnimation();
+            return (T)window;
+        }
+        private T CreateView<T>(T windowPrefab) where T : WindowBase
+        {
+            var window = Instantiate(windowPrefab, root);
+            window.OnOpened();
+            window.ShowAnimation();
             window.gameObject.SetActive(true);
             shownWindows.Add(window);
             return (T)window;
@@ -55,7 +62,7 @@ namespace Game.UI
         {
             var win = shownWindows.Find(w => w == closeWindow);
             if (!win) return;
-            win.animator.StartAnimation(true, () =>
+            win.CloseAnimation(onCompleted: () =>
             {
                 if (win.isReusableView) win.gameObject.SetActive(false);
                 else
@@ -73,7 +80,6 @@ namespace Game.UI
         public T GetOpenedWindow<T>() where T : WindowBase
         {
             T win = (T)shownWindows.Find(w => w is T);
-            // if (win == null) win = Show<T>();
             return win;
         }
         void OnGUI()

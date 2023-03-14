@@ -10,32 +10,24 @@ namespace Game.UI
     public class WindowBase : MonoBehaviour
     {
         public Button closeButton;
-        public WindowAnimator animator;
         public bool isReusableView = true;
         [HideInInspector] public UnityEvent onClose = new UnityEvent();
         [HideInInspector] public bool active = false;
-        private void Awake()
+        protected virtual void Awake()
         {
             closeButton?.onClick.AddListener(Close);
-            animator.Init(transform);
         }
         public void Close()
         {
             WindowManager.instance.Close(this);
         }
-        public virtual float ShowAnimation(Action onCompleted = null)
+        public virtual float ShowAnimation()
         {
-            animator.StartShowAnimation(() =>
-            {
-                gameObject.SetActive(true);
-                onCompleted?.Invoke();
-            });
-            return animator.duration;
+            return 0;
         }
-        public virtual float CloseAnimation(Action onCompleted = null)
+        public virtual float CloseAnimation()
         {
-            animator.StartHideAnimation(onCompleted);
-            return animator.duration;
+            return 0;
         }
         public virtual void OnOpened()
         {

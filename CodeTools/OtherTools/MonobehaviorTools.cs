@@ -18,7 +18,7 @@ public static class MonobehaviorTools
     {
         component?.gameObject?.SetActive(value);
     }
-    public static T GetOrAddCommponent<T>(this Component component) where T : Component
+    public static T GetOrAddComponent<T>(this Component component) where T : Component
     {
         var c = component.gameObject.GetComponent<T>();
         if (c == null) c = component.gameObject.AddComponent<T>();

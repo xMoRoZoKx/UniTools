@@ -13,8 +13,7 @@ namespace Game.UI
     [System.Serializable]
     public class WindowAnimator
     {
-        public float duration = 0.2f;
-        [SerializeField] private float period = 0f;
+        public float duration = 0.5f;
         [SerializeField] private bool useFade = true;
         [SerializeField] private List<AnimatedObject> animateObjects;
         [SerializeField] private AnimationSettings defaultSettings;
@@ -28,7 +27,7 @@ namespace Game.UI
                     Debug.LogError("Need itin animator");
                     return null;
                 }
-                if (_canvasGroup == null) _canvasGroup = root.GetOrAddCommponent<CanvasGroup>();
+                if (_canvasGroup == null) _canvasGroup = root.GetOrAddComponent<CanvasGroup>();
                 return _canvasGroup;
             }
         }
@@ -57,16 +56,13 @@ namespace Game.UI
             onCompleted?.Invoke();
         }
     }
+
     public class StateData
     {
         public StateData(Vector3 scale, Vector3 position)
         {
             Scale = scale;
             Position = position;
-        }
-        public StateData()
-        {
-
         }
         public Vector3 Scale;
         public Vector3 Position;
@@ -77,6 +73,7 @@ namespace Game.UI
         public Vector3 displacement;
         public float scaleForce = 0;
         public bool useBoomScale;
+        public float offset = 0;
     }
     [System.Serializable]
     public class AnimatedObject
@@ -85,13 +82,34 @@ namespace Game.UI
         public bool useDefaultSettings = true;
         public AnimationSettings settings = new AnimationSettings();
         private StateData startState;
-        public void StartShowAnimation(float duration, AnimationSettings defaultSettings = null)
+        public void Preparation(float duration, AnimationSettings defaultSettings)
         {
             transform.DOKill();
 
+            if (startState == null) startState = new StateData(transform.localScale, transform.position);
+
             if (useDefaultSettings && defaultSettings != null) settings = defaultSettings;
 
-            if (startState == null) startState = new StateData(transform.localScale, transform.position);
+            if (settings.offset > duration)
+            {
+                Debug.LogError("offset must be less than the duration");
+            }
+
+            duration = duration - settings.offset;
+        }
+        public void Reset()
+        {
+            if (startState == null) return;
+            transform.position = startState.Position;
+            transform.localScale = startState.Scale;
+        }
+        public async void StartShowAnimation(float duration, AnimationSettings defaultSettings = null)
+        {
+            Preparation(duration, defaultSettings);
+
+            transform.position = startState.Position + settings.displacement;
+            if (settings.scaleForce != 0) transform.localScale = startState.Scale / settings.scaleForce;
+            await TaskTools.WaitForSeconds(settings.offset);
 
             if (settings.scaleForce != 0)
             {
@@ -105,22 +123,21 @@ namespace Game.UI
                 }
             }
 
-            transform.localPosition = startState.Position + settings.displacement;
             transform.DOMove(startState.Position, duration);
         }
-        public void StartHideAnimation(float duration, AnimationSettings defaultSettings = null)
+        public async void StartHideAnimation(float duration, AnimationSettings defaultSettings = null)
         {
-            transform.DOKill();
-
-            if (startState == null) startState = new StateData(transform.localScale, transform.position);
-
-            if (useDefaultSettings && defaultSettings != null) settings = defaultSettings;
+            Preparation(duration, defaultSettings);
 
             transform.position = startState.Position;
             transform.localScale = startState.Scale;
 
+            await TaskTools.WaitForSeconds(settings.offset);
+
             if (settings.scaleForce != 0) transform.DOScale(startState.Scale / settings.scaleForce, duration);//.OnComplete(() => transform.localScale = startState.Scale);
             transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
+            await TaskTools.WaitForSeconds(duration);
+            Reset();
         }
     }
 }

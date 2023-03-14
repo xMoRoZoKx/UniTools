@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Tools.PlayerPrefs;
 using UnityEngine;
-namespace Game.CodeTools
+
+namespace Tools.Reactive
 {
     [System.Serializable]
     public class Reactive<T> : IReactive<T>

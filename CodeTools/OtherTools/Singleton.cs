@@ -1,8 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-namespace Game.CodeTools
+namespace Tools
 {
     public class Singleton<T> : ISingleton<T> where T : Singleton<T>, new()
     {

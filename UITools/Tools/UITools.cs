@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace UITools
+namespace Tools
 {
     public static class UITools
     {

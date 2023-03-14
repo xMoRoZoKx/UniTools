@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
-namespace Game.CodeTools
+namespace Tools.Reactive
 {
     [System.Serializable]
     public enum ReactiveCollectionEventType

@@ -1,10 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Game.UI;
-using Tools;
-using UnityEngine;
-namespace Game.UI
+namespace Tools
 {
     public class AnimatedWindowBase : WindowBase
     {
@@ -14,7 +8,7 @@ namespace Game.UI
             base.Awake();
             animator.Init(transform);
         }
-        
+
         public override float ShowAnimation()
         {
             animator.StartShowAnimation(() =>

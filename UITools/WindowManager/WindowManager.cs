@@ -1,12 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Game.CodeTools;
 using Tools;
 using UnityEngine;
 
-namespace Game.UI
+namespace Tools
 {
     [RequireComponent(typeof(Canvas))]
     public class WindowManager : SingletonBehavior<WindowManager>

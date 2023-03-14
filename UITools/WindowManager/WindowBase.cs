@@ -19,7 +19,7 @@ namespace Game.UI
         }
         public void Close()
         {
-            WindowManager.instance.Close(this);
+            WindowManager.Instance.Close(this);
         }
         public virtual float ShowAnimation()
         {

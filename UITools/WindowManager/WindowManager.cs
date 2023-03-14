@@ -2,30 +2,38 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Game.CodeTools;
 using Tools;
 using UnityEngine;
 
 namespace Game.UI
 {
     [RequireComponent(typeof(Canvas))]
-    public class WindowManager : MonoBehaviour
+    public class WindowManager : SingletonBehavior<WindowManager>
     {
-        public static WindowManager instance;
+        // public static WindowManager instance;
         public Transform root;
         public Canvas canvas { get; private set; }
         private List<WindowBase> prefabs;
         private List<WindowBase> createdWindows = new List<WindowBase>();
         private List<WindowBase> shownWindows = new List<WindowBase>();
-        private void Awake()
+        // protected override void Awake()
+        // {
+        //     base.Awake();
+        //     // if (instance == null)
+        //     // {
+        //     //     instance = this;
+        //     //     canvas = GetComponent<Canvas>();
+        //     //     prefabs = Resources.LoadAll<WindowBase>("").ToList();
+        //     //     DontDestroyOnLoad(this);
+        //     // }
+        //     // else Destroy(gameObject);
+        // }
+        protected override void OnCreateInstance()
         {
-            if (instance == null)
-            {
-                instance = this;
-                canvas = GetComponent<Canvas>();
-                prefabs = Resources.LoadAll<WindowBase>("").ToList();
-                DontDestroyOnLoad(this);
-            }
-            else Destroy(gameObject);
+            canvas = GetComponent<Canvas>();
+            prefabs = Resources.LoadAll<WindowBase>("").ToList();
+            DontDestroyOnLoad(this);
         }
         public T Show<T>() where T : WindowBase
         {
@@ -63,7 +71,7 @@ namespace Game.UI
         }
         public void Close(WindowBase closeWindow)
         {
-            Debug.Log("close" + closeWindow.name );
+            Debug.Log("close" + closeWindow.name);
             var win = shownWindows.FindLast(w => w == closeWindow);
             if (!win) return;
             win.onClose.Invoke();

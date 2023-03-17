@@ -1,4 +1,5 @@
 using System;
+using Tools;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,5 +31,16 @@ public static class MonobehaviorTools
     public static void Teleportation(this Transform transform, Vector2 position)
     {
         transform.position += (Vector3)(position - new Vector2(transform.position.x, transform.position.y));
+    }
+    public static Vector3 ScreenToWorldPointPerspective(this Camera camera, Vector2 screenPos)
+    {
+        Plane plane = new Plane(Vector3.back, Vector3.zero);
+        Ray ray = camera.ScreenPointToRay(new Vector3(screenPos.x, screenPos.y));
+        if (plane.Raycast(ray, out float enter))
+        {
+            // Debug.Log(ray.GetPoint(enter));
+            return ray.GetPoint(enter);
+        }
+        return ray.GetPoint(1);
     }
 }

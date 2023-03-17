@@ -85,6 +85,13 @@ namespace Tools.Reactive
             reactive.GetSave(saveKey);
             reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
         }
+        // public static Reactive GetSaverValue<Reactive>(string saveKey) where Reactive : IReactive<>, new()
+        // {
+        //     var reactive = new Reactive();
+        //     reactive.GetSave(saveKey);
+        //     reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
+        //     return reactive;
+        // }
         public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
         {
             reactive.Unsubscribe(saveKey);

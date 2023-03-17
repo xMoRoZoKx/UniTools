@@ -9,17 +9,7 @@ namespace Tools
     public interface ISingleton<T> where T : ISingleton<T>, new()
     {
         private static T _instance;
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new T();
-                }
-                return _instance;
-            }
-        }
+        public static T Instance => _instance??= new T();
     }
     public class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
     {

@@ -89,6 +89,8 @@ namespace Tools
             if (settings.offset > duration)
             {
                 Debug.LogError("offset must be less than the duration");
+                settings.offset = duration;
+
             }
 
             duration = duration - settings.offset;
@@ -119,7 +121,7 @@ namespace Tools
                 }
             }
 
-            transform.DOMove(startState.Position, duration);
+            if(settings.displacement != Vector3.zero) transform.DOMove(startState.Position, duration);
         }
         public async void StartHideAnimation(float duration, AnimationSettings defaultSettings = null)
         {
@@ -131,7 +133,7 @@ namespace Tools
             await TaskTools.WaitForSeconds(settings.offset);
 
             if (settings.scaleForce != 0) transform.DOScale(startState.Scale / settings.scaleForce, duration);//.OnComplete(() => transform.localScale = startState.Scale);
-            transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
+            if(settings.displacement != Vector3.zero)  transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
             await TaskTools.WaitForSeconds(duration);
             Reset();
         }

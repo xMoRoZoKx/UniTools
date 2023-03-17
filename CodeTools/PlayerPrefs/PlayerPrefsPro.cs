@@ -17,20 +17,17 @@ namespace Tools.PlayerPrefs
             }
             public T value;
         }
-        private const string SAVE_KEY = "MJN3S";
-        private static string GetKey(string key) => key;
-        public static string Patch => Application.persistentDataPath + "/" + SAVE_KEY;
+        private const string BASE_SAVE_KEY = "MJN3S";
+        public static string Patch => Application.persistentDataPath + "/" + BASE_SAVE_KEY;
         public static void Set<T>(string key, T obj) => Set<T>(key, obj, true);
         private static void Set<T>(string key, T obj, bool saveKey)
         {
-            var secretKey = GetKey(key);
-            SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), secretKey);
-            if (saveKey) SetNewKey(secretKey);
+            SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key);
+            if (saveKey) TryAddNewKey(key);
         }
         public static T Get<T>(string key)
         {
-            var secretKey = GetKey(key);
-            var bytes = GetBytes(secretKey);
+            var bytes = GetBytes(key);
 
             string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
             if (String.IsNullOrEmpty(json)) return default;
@@ -69,30 +66,30 @@ namespace Tools.PlayerPrefs
 
         private static List<string> GetAllKeys()
         {
-            return Get<List<string>>(SAVE_KEY + "_ALL_KEYS");
+            return Get<List<string>>(BASE_SAVE_KEY + "_ALL_KEYS");
         }
-        private static void SetNewKey(string newKey)
+        private static void TryAddNewKey(string newKey)
         {
             var keys = GetAllKeys();
             if (keys == null) keys = new List<string>();
             if (keys.Contains(newKey)) return;
             keys.Add(newKey);
-            Set<List<string>>(SAVE_KEY + "_ALL_KEYS", keys, false);
+            Set<List<string>>(BASE_SAVE_KEY + "_ALL_KEYS", keys, false);
         }
         public static void DeleteKey(string key)
         {
             if (!HasKey(key)) return;
             var keys = GetAllKeys();
-            File.Delete(Patch + keys.Find(k => k == GetKey(key)));
-            Set<List<string>>(SAVE_KEY + "_ALL_KEYS", keys, false);
+            File.Delete(Patch + keys.Find(k => k == key));
+            Set<List<string>>(BASE_SAVE_KEY + "_ALL_KEYS", keys, false);
         }
 #if UNITY_EDITOR
         [MenuItem("PlayerPrefsPro/Clear")]
 #endif
         public static void DeleteAllKeys()
         {
-            GetAllKeys()?.ForEach(key => File.Delete(Patch + GetKey(key)));
-            Set<List<string>>(SAVE_KEY + "_ALL_KEYS", new List<string>(), false);
+            GetAllKeys()?.ForEach(key => File.Delete(Patch + key));
+            Set<List<string>>(BASE_SAVE_KEY + "_ALL_KEYS", new List<string>(), false);
         }
     }
 }

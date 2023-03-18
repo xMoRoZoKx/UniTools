@@ -67,9 +67,25 @@ namespace Tools
     public class AnimationSettings
     {
         public Vector3 displacement;
-        public float scaleForce = 0;
-        public bool useBoomScale;
-        public float offset = 0;
+        public ScaleVector scaleForce;
+        [Range(0, 100)] public int offset = 0;
+    }
+    [System.Serializable]
+    public class ScaleVector
+    {
+        [Range(0, 1000)] public float x;
+        [Range(0, 1000)] public float y;
+        [Range(0, 1000)] public float z;
+        [Range(0, 10)] public float punchScaleForce = 1;
+        public Vector3 GetVector() => new Vector3(x, y, z);
+        public bool isZeroVector => x == default && y == default && z == default;
+        public static Vector3 operator /(Vector3 uniVector, ScaleVector scaleVector)
+        {
+            float x = scaleVector.x == 0 ? uniVector.x : uniVector.x / scaleVector.x;
+            float y = scaleVector.y == 0 ? uniVector.y : uniVector.y / scaleVector.y;
+            float z = scaleVector.z == 0 ? uniVector.z : uniVector.z / scaleVector.z;
+            return new Vector3(x, y, z);
+        }
     }
     [System.Serializable]
     public class AnimatedObject
@@ -86,14 +102,7 @@ namespace Tools
 
             if (useDefaultSettings && defaultSettings != null) settings = defaultSettings;
 
-            if (settings.offset > duration)
-            {
-                Debug.LogError("offset must be less than the duration");
-                settings.offset = duration;
-
-            }
-
-            duration = duration - settings.offset;
+            duration = duration - duration / 100 * settings.offset;
         }
         public void Reset()
         {
@@ -106,22 +115,22 @@ namespace Tools
             Preparation(duration, defaultSettings);
 
             transform.position = startState.Position + settings.displacement;
-            if (settings.scaleForce != 0) transform.localScale = startState.Scale / settings.scaleForce;
-            await TaskTools.WaitForSeconds(settings.offset);
+            if (!settings.scaleForce.isZeroVector) transform.localScale = startState.Scale / settings.scaleForce;
+            await TaskTools.WaitForSeconds(duration / 100 * settings.offset);
 
-            if (settings.scaleForce != 0)
+            if (!settings.scaleForce.isZeroVector)
             {
                 transform.localScale = startState.Scale / settings.scaleForce;
-                if (!settings.useBoomScale) transform.DOScale(startState.Scale, duration);
+                if (settings.scaleForce.punchScaleForce == 0) transform.DOScale(startState.Scale, duration);
                 else
                 {
-                    const float boomForce = 1.02f;
+                    float punchForce = settings.scaleForce.punchScaleForce;
                     const float boomTime = 0.1f;
-                    transform.DOScale(startState.Scale * boomForce, duration - boomTime).OnComplete(() => transform.DOScale(startState.Scale / boomForce, boomTime));
+                    transform.DOScale(startState.Scale * punchForce, duration - boomTime).OnComplete(() => transform.DOScale(startState.Scale / punchForce, boomTime));
                 }
             }
 
-            if(settings.displacement != Vector3.zero) transform.DOMove(startState.Position, duration);
+            if (settings.displacement != Vector3.zero) transform.DOMove(startState.Position, duration);
         }
         public async void StartHideAnimation(float duration, AnimationSettings defaultSettings = null)
         {
@@ -130,10 +139,10 @@ namespace Tools
             transform.position = startState.Position;
             transform.localScale = startState.Scale;
 
-            await TaskTools.WaitForSeconds(settings.offset);
+            await TaskTools.WaitForSeconds(duration / 100 * settings.offset);
 
-            if (settings.scaleForce != 0) transform.DOScale(startState.Scale / settings.scaleForce, duration);//.OnComplete(() => transform.localScale = startState.Scale);
-            if(settings.displacement != Vector3.zero)  transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
+            if (!settings.scaleForce.isZeroVector) transform.DOScale(startState.Scale / settings.scaleForce, duration);//.OnComplete(() => transform.localScale = startState.Scale);
+            if (settings.displacement != Vector3.zero) transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
             await TaskTools.WaitForSeconds(duration);
             Reset();
         }

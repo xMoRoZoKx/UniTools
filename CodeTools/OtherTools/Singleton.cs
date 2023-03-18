@@ -1,7 +1,7 @@
 using UnityEngine;
 namespace Tools
 {
-    public class Singleton<T> : ISingleton<T> where T : Singleton<T>, new()
+    internal class Singleton<T> : ISingleton<T> where T : Singleton<T>, new()
     {
         public static T Instance => ISingleton<T>.Instance;
     }
@@ -11,7 +11,7 @@ namespace Tools
         private static T _instance;
         public static T Instance => _instance??= new T();
     }
-    public class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
+    internal class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
     {
         private static T _instance;
         public static T Instance => _instance;

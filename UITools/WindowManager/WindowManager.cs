@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Tools
 {
     [RequireComponent(typeof(Canvas))]
-    public class WindowManager : SingletonBehavior<WindowManager>
+    internal class WindowManager : SingletonBehavior<WindowManager>
     {
         // public static WindowManager instance;
         public Transform root;

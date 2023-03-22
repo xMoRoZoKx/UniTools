@@ -3,21 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
- 
+
 public class FPSCounter : MonoBehaviour
 {
     [SerializeField] private TMP_Text text;
-    private float time = 0f;
-    private int i = 0;
+    private float timeFromLastUpdate = 0f;
+    private int fpsCount = 0;
     void Update()
     {
-        i++;
-        time += Time.deltaTime;
-        if(time>= 1.0f)
+        fpsCount++;
+        timeFromLastUpdate += Time.deltaTime;
+        if (timeFromLastUpdate >= 1)
         {
-            time = 0;
-            text.text = "FPS: " + i.ToString(".0");
-            i = 0;
+            text.text = "FPS: " + fpsCount;
+            timeFromLastUpdate = 0;
+            fpsCount = 0;
         }
     }
 }

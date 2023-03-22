@@ -34,9 +34,19 @@ namespace Tools
             request.method = "PATCH";
             return request;
         }
-        public static void DestroyDefender(this UnityWebRequest request, bool validateCertificate)
+        public static void DestroyDefender(this UnityWebRequest request)
         {
             request.certificateHandler = new BypassCertificate();
+        }
+        public static bool HasError(this UnityWebRequest request)
+        {
+            if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError ||
+                request.result == UnityWebRequest.Result.DataProcessingError)
+            {
+                Debug.LogError(request.error);
+                return true;
+            }
+            return false;
         }
     }
     public class BypassCertificate : CertificateHandler

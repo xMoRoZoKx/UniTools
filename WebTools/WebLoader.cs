@@ -18,8 +18,12 @@ namespace Tools
                     yield break;
                 }
                 //Need set headers
-                if (!needValidateCertificate) request.certificateHandler = new BypassCertificate();
+                if (!needValidateCertificate) request.DestroyDefender();
                 yield return request.SendWebRequest();
+                if (request.HasError())
+                {
+                    Debug.LogError(request.error);
+                }
                 Texture2D texture = DownloadHandlerTexture.GetContent(request);
                 getTextureEvent.Invoke(texture);
                 if (createCash) PlayerPrefsPro.SetTexture(url, texture);
@@ -32,33 +36,51 @@ namespace Tools
                 getSpriteEvent.Invoke(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0), 100));
             }, createCash, needValidateCertificate);
         }
-        public static IEnumerator LoadAssetBundle(string url, Action<AssetBundle> getBundleEvent, bool createCash = true, bool needValidateCertificate = true)
+        public static IEnumerator LoadAssetBundle(string url, Action<AssetBundle> getBundleEvent, Action<float> progress, bool createCash = true, bool needValidateCertificate = true)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
                 //need set headers
+                AssetBundle bundle = null;
                 if (createCash && PlayerPrefsPro.HasKey(url))
                 {
-                    AssetBundle bundle = AssetBundle.LoadFromMemory(PlayerPrefsPro.GetBytes(url));
+                    bundle = AssetBundle.LoadFromMemory(PlayerPrefsPro.GetBytes(url));
                     getBundleEvent.Invoke(bundle);
                     yield break;
                 }
-                if (!needValidateCertificate) request.certificateHandler = new BypassCertificate();
+                
+                if (!needValidateCertificate) request.DestroyDefender();
+
                 request.SendWebRequest();
                 while (!request.isDone)
                 {
                     yield return null;
                 }
-                if (request.result == UnityWebRequest.Result.ConnectionError)
+
+                if (request.HasError())
                 {
-                    Debug.Log(request.error);
+                    Debug.LogError(request.error);
+                    yield break;
                 }
-                else
+
+                if (createCash) PlayerPrefsPro.SetBytes(request.downloadHandler.data, url);
+
+                bundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+                getBundleEvent.Invoke(bundle);
+
+            }
+        }
+        public static IEnumerator DownloadGoogleTable(string url, string sheetId, Action<string> callback)
+        {
+            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            {
+                yield return request.SendWebRequest();
+                if (request.HasError())
                 {
-                    if (createCash) PlayerPrefsPro.SetBytes(request.downloadHandler.data, url);
-                    AssetBundle bundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
-                    getBundleEvent.Invoke(bundle);
+                    Debug.LogError(request.error);
+                    yield break;
                 }
+                callback(request.downloadHandler.text);
             }
         }
     }

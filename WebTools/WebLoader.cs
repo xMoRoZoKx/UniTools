@@ -18,7 +18,7 @@ namespace Tools
                     yield break;
                 }
                 //Need set headers
-                if (!needValidateCertificate) request.DestroyDefender();
+                if (!needValidateCertificate) request.RemoveCertificateValidation();
                 yield return request.SendWebRequest();
                 if (request.HasError())
                 {
@@ -48,8 +48,8 @@ namespace Tools
                     getBundleEvent.Invoke(bundle);
                     yield break;
                 }
-                
-                if (!needValidateCertificate) request.DestroyDefender();
+
+                if (!needValidateCertificate) request.RemoveCertificateValidation();
 
                 request.SendWebRequest();
                 while (!request.isDone)
@@ -70,18 +70,25 @@ namespace Tools
 
             }
         }
-        public static IEnumerator LoadText(string url, Action<string> callback)
+        public static IEnumerator LoadText(string url, Action<string> getTextEvent)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
+                //need set headers
                 yield return request.SendWebRequest();
                 if (request.HasError())
                 {
                     Debug.LogError(request.error);
                     yield break;
                 }
-                callback(request.downloadHandler.text);
+                getTextEvent(request.downloadHandler.text);
             }
+        }
+        public static IEnumerator LoadGoogleTable(string url, Action<GoogleTable> getTableEvent)
+        {
+            string text = "";
+            yield return LoadText(url, txt => text = txt);
+            getTableEvent(new GoogleTable(text));
         }
     }
 }

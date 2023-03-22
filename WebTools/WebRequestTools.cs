@@ -34,7 +34,7 @@ namespace Tools
             request.method = "PATCH";
             return request;
         }
-        public static void DestroyDefender(this UnityWebRequest request)
+        public static void RemoveCertificateValidation(this UnityWebRequest request)
         {
             request.certificateHandler = new BypassCertificate();
         }

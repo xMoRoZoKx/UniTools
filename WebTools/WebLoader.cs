@@ -70,7 +70,7 @@ namespace Tools
 
             }
         }
-        public static IEnumerator DownloadGoogleTable(string url, string sheetId, Action<string> callback)
+        public static IEnumerator LoadText(string url, Action<string> callback)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {

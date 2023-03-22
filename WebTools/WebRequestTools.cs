@@ -111,56 +111,5 @@ namespace Tools
                 }
             }
         }
-
-        //OLD CODE
-        public static void ReserShaders<T>(GameObject prefab) where T : Renderer
-        {
-            Shader newShader; //= Shader.Find("Kirnu/Marvelous/CustomLightingMaster");
-            if (prefab.transform.GetComponentsInChildren<T>().Length > 0)
-            {
-                newShader = Shader.Find(prefab.transform.GetComponentsInChildren<T>()[0].material.shader.name); //SEARCH SHADER IN OBJECT
-                if (newShader == null) newShader = Shader.Find("Standard");
-                for (int i = 0; i < prefab.transform.GetComponentsInChildren<T>().Length; i++) //RESET SHADER
-                    prefab.transform.GetComponentsInChildren<T>()[i].material.shader = newShader;
-            }
-        }
-        public static void ResetShaders(GameObject prefab)
-        {
-            ReserShaders<MeshRenderer>(prefab);
-            ReserShaders<SpriteRenderer>(prefab);
-            ReserShaders<SkinnedMeshRenderer>(prefab);
-        }
-    }
-
-    public class DownloadManager : MonoBehaviour
-    {
-        [SerializeField] private TMP_Text textProgress;
-        [SerializeField] private UnityEngine.UIElements.ProgressBar progressBar;
-        private string _path = "GameSfavingdghdhjdrfhfwefrghyhktyfd";
-        public IEnumerator Download3DModel(string url, List<GameObject> modelsPac, string uid)
-        {
-            if (!LoadModelOfPhone(modelsPac, uid)) yield return StartCoroutine(DownloadAssetBundle(url, uid));
-            LoadModelOfPhone(modelsPac, uid);
-        }
-
-        private bool LoadModelOfPhone(List<GameObject> modelsPac, string uid)
-        {
-            AssetBundle bundle = AssetBundle.LoadFromFile(Application.persistentDataPath + _path + uid);
-
-            if (bundle == null) return false;
-            string[] nameAsset = bundle.GetAllAssetNames();
-            var prefab = bundle.LoadAsset(nameAsset[0]);
-
-            modelsPac.Add(prefab.GameObject());
-            bundle.Unload(false);
-            if (prefab != null) return true;
-            return false;
-        }
-
-
-        private void SaveModelInPhone(byte[] saveBytes, string uid)//SAVE DATA IN BYTE
-        {
-            File.WriteAllBytes(Application.persistentDataPath + _path + uid, saveBytes);
-        }
     }
 }

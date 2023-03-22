@@ -6,31 +6,41 @@ using UnityEngine;
 namespace Tools
 {
     [RequireComponent(typeof(Canvas))]
-    internal class WindowManager : SingletonBehavior<WindowManager>
+    internal class WindowManager : MonoBehaviour
     {
-        // public static WindowManager instance;
+        private static WindowManager _instance;
+        public static WindowManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    var managers = Resources.LoadAll<WindowManager>("");
+                    if(managers.Count() == 0) 
+                    {
+                        Debug.LogError("Window manager not found");
+                        return null;
+                    }
+                    _instance = Object.Instantiate(managers[0]);
+                }
+                return _instance;
+            }
+        }
         public Transform root;
         public Canvas canvas { get; private set; }
         private List<WindowBase> prefabs;
         private List<WindowBase> createdWindows = new List<WindowBase>();
         private List<WindowBase> shownWindows = new List<WindowBase>();
-        // protected override void Awake()
-        // {
-        //     base.Awake();
-        //     // if (instance == null)
-        //     // {
-        //     //     instance = this;
-        //     //     canvas = GetComponent<Canvas>();
-        //     //     prefabs = Resources.LoadAll<WindowBase>("").ToList();
-        //     //     DontDestroyOnLoad(this);
-        //     // }
-        //     // else Destroy(gameObject);
-        // }
-        protected override void OnCreateInstance()
+        private void Awake()
         {
-            canvas = GetComponent<Canvas>();
-            prefabs = Resources.LoadAll<WindowBase>("").ToList();
-            DontDestroyOnLoad(this);
+            if (_instance == null)
+            {
+                _instance = this;
+                canvas = GetComponent<Canvas>();
+                prefabs = Resources.LoadAll<WindowBase>("").ToList();
+                DontDestroyOnLoad(this);
+            }
+            else Destroy(gameObject);
         }
         public T Show<T>() where T : WindowBase
         {
@@ -54,6 +64,7 @@ namespace Tools
             window.transform.SetSiblingIndex(root.childCount - 1);
             window.OnOpened();
             window.ShowAnimation();
+            window.active = true;
             shownWindows.Add(window);
             return (T)window;
         }
@@ -64,11 +75,12 @@ namespace Tools
             window.ShowAnimation();
             createdWindows.Add(window);
             shownWindows.Add(window);
+            window.active = true;
             return (T)window;
         }
         public void Close(WindowBase closeWindow)
         {
-            Debug.Log("close" + closeWindow.name);
+            Debug.Log("close" + closeWindow?.name);
             var win = shownWindows.FindLast(w => w == closeWindow);
             if (!win) return;
             win.onClose.Invoke();

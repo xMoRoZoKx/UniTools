@@ -43,20 +43,30 @@ namespace Tools.PlayerPrefs
             if (!HasKey(key)) return null;
             return File.ReadAllBytes(Patch + key);
         }
+        public static string GetPatch(string key)
+        {
+            return Patch + key;
+        }
 
         public static void SetSprite(string key, Sprite sprite) => File.WriteAllBytes(Patch + key, sprite.texture.EncodeToPNG());
+        public static void SetTexture(string key, Texture2D texture) => File.WriteAllBytes(Patch + key, texture.EncodeToPNG());
         public static void SetFloat(string key, float value) => Set(key, value);
         public static void SetInt(string key, int value) => Set(key, value);
         public static void SetString(string key, string value) => Set(key, value);
 
         public static Sprite GetSprite(string key)
         {
+            var texture = GetTexture(key);
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0), 100);
+        }
+        public static Texture2D GetTexture(string key)
+        {
             string patch = Patch + key;
             if (!File.Exists(patch)) return null;
             Texture2D texture = Texture2D.normalTexture;
 
             texture.LoadImage(File.ReadAllBytes(patch));
-            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0), 100);
+            return texture;
         }
         public static float GetFloat(string key) => Get<float>(key);
         public static int GetInt(string key) => Get<int>(key);

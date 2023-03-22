@@ -26,9 +26,6 @@ namespace Tools
         {
             return 0;
         }
-        public virtual void OnOpened()
-        {
-            active = true;
-        }
+        public virtual void OnOpened(){}
     }
 }

@@ -12,16 +12,15 @@ namespace Tools
         public bool PlayInEditorMode = false;
         static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         static CancellationToken token = cancelTokenSource.Token;
-        public Task WaitForSeconds(float seconds)
+        public Task WaitForSeconds(float seconds, bool playInEditorMode = false)
         {
-            return WaitForMilliseconds((long)seconds * 1000, 100);
+            return WaitForMilliseconds((long)seconds * 1000, playInEditorMode);
         }
-        public Task WaitForMilliseconds(long milliseconds, int accuracy = 1)
+        public Task WaitForMilliseconds(long milliseconds, bool playInEditorMode = false, int accuracy = 1)
         {
-            if (!Application.isPlaying)
+            if ((!Application.isPlaying && !playInEditorMode) || IsStopped)
             {
-                cancelTokenSource.Cancel();
-                cancelTokenSource.Dispose();
+                Cancel();
                 return null;
             }
             return Task.Run(() =>
@@ -51,6 +50,11 @@ namespace Tools
         public void Resume()
         {
             IsPaused = false;
+        }
+        public void Cancel()
+        {
+            cancelTokenSource.Cancel();
+            cancelTokenSource.Dispose();
         }
         public void Stop()
         {

@@ -90,9 +90,15 @@ namespace Tools
     [System.Serializable]
     public class AnimatedObject
     {
-        public Transform transform;
-        public bool useDefaultSettings = true;
-        public AnimationSettings settings = new AnimationSettings();
+        public AnimatedObject(){}
+        public AnimatedObject(Transform transform, AnimationSettings settings)
+        {
+            this.transform = transform;
+            this.settings = settings;
+        }
+        [SerializeField] private Transform transform;
+        [SerializeField] private bool useDefaultSettings = true;
+        [SerializeField] private AnimationSettings settings = new AnimationSettings();
         private StateData startState;
         public void Preparation(float duration, AnimationSettings defaultSettings)
         {

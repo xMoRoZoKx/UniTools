@@ -5,16 +5,22 @@ namespace Tools
     {
         public static T Instance => ISingleton<T>.Instance;
     }
-    
+
     public interface ISingleton<T> where T : ISingleton<T>, new()
     {
         private static T _instance;
-        public static T Instance => _instance??= new T();
+        public static T Instance => _instance ??= new T();
     }
     internal class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
     {
         private static T _instance;
-        public static T Instance => _instance;
+        public static T Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
         protected virtual void Awake()
         {
             if (_instance == null)
@@ -24,6 +30,6 @@ namespace Tools
             }
             else Destroy(this);
         }
-        protected virtual void OnCreateInstance(){}
+        protected virtual void OnCreateInstance() { }
     }
 }

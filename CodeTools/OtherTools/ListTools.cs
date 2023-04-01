@@ -19,6 +19,7 @@ namespace Tools
             if (count > list.Count) count = list.Count;
             return list.ToList().Shuffle().GetRange(0, count);
         }
+        public static T Last<T>(this List<T> list) => list[list.Count - 1];
         public static List<T> Shuffle<T>(this List<T> list)
         {
             if (list.Count == 0) return default;

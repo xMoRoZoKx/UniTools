@@ -6,7 +6,7 @@ namespace Tools
 {
     public class Presenter<Data, View> : IDisposable where View : MonoBehaviour
     {
-        private List<View> views = new List<View>();
+        public List<View> views = new List<View>();
 
         public List<View> Present(List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
         {

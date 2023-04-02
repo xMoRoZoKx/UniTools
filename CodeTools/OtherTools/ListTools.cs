@@ -38,9 +38,9 @@ namespace Tools
         public static List<T> Resize<T>(this List<T> list, int size, T defaultValue = default)
         {
             int startCount = list.Count;
-            if (list.Count > size)
+            if (startCount > size)
             {
-                for (int i = startCount - 1; i > size - 1; i++)
+                for (int i = startCount - 1; i > size - 1; i--)
                 {
                     list.RemoveAt(i);
                 }

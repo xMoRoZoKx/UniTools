@@ -40,7 +40,7 @@ namespace Tools
             int startCount = list.Count;
             if (list.Count > size)
             {
-                for (int i = list.Count - 1; i > size; i++)
+                for (int i = startCount - 1; i > size - 1; i++)
                 {
                     list.RemoveAt(i);
                 }

@@ -35,13 +35,23 @@ namespace Tools
             }
             return list;
         }
-        public static List<T> Resize<T>(this List<T> list, int size)
+        public static List<T> Resize<T>(this List<T> list, int size, T defaultValue = default)
         {
-            for (int i = 0; i < list.Count + size; i++)
+            int startCount = list.Count;
+            if (list.Count > size)
             {
-                list.Add(default);
+                for (int i = list.Count - 1; i > size; i++)
+                {
+                    list.RemoveAt(i);
+                }
             }
-            if (list.Count > size) list = list.GetRange(0, size);
+            else
+            {
+                for (int i = 0; i < startCount + size; i++)
+                {
+                    list.Add(defaultValue);
+                }
+            }
             return list;
         }
         public static bool AddIfNotContains<T>(this List<T> list, T element)

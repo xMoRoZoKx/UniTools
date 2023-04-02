@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Tools
@@ -8,8 +9,9 @@ namespace Tools
     {
         public List<View> views = new List<View>();
 
-        public List<View> Present(List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
+        public Presenter<Data, View> Present(List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
         {
+            views = container.GetComponentsInChildren<View>().ToList();
             views.ForEach(v => v.SetActive(false));
             for (int i = 0; i < list.Count; i++)
             {
@@ -18,13 +20,13 @@ namespace Tools
                 views[i].SetActive(true);
                 onShow?.Invoke(views[i], list[i]);
             }
-            return views.GetRange(0, list.Count);
+            return this;
         }
 
 
         public void Dispose()
         {
-            views.ForEach(view => UnityEngine.Object.Destroy(view.gameObject));
+            views.ForEach(view => view.SetActive(false));
             views.Clear();
         }
     }

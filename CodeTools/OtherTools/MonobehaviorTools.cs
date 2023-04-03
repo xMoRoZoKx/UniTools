@@ -28,6 +28,11 @@ public static class MonobehaviorTools
     {
         transform.position += position - transform.position;
     }
+    public static void LocalRotate(this Transform transform, float xAngle, float yAngle, float zAngle)
+    {
+        var startRot = transform.localEulerAngles;
+        transform.localRotation = Quaternion.Euler(startRot.x + xAngle, startRot.y + yAngle, startRot.z + zAngle);
+    }
     public static void Teleportation(this Transform transform, Vector2 position)
     {
         transform.position += (Vector3)(position - new Vector2(transform.position.x, transform.position.y));
@@ -75,7 +80,7 @@ public static class MonobehaviorTools
         float rotY = (float)renderer.sprite.texture.height / (float)sprite.texture.height;
         float rotPixel = (float)renderer.sprite.pixelsPerUnit / (float)sprite.pixelsPerUnit;
         renderer.sprite = sprite;
-        
+
         var scale = renderer.transform.localScale / rotPixel;
 
         renderer.transform.localScale = new Vector3(scale.x * rotX, scale.y * rotY, 0);

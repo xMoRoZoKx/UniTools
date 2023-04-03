@@ -1,7 +1,7 @@
 using UnityEngine;
 namespace Tools
 {
-    internal class Singleton<T> : ISingleton<T> where T : Singleton<T>, new()
+    public class Singleton<T> : ISingleton<T> where T : Singleton<T>, new()
     {
         public static T Instance => ISingleton<T>.Instance;
     }
@@ -11,13 +11,24 @@ namespace Tools
         private static T _instance;
         public static T Instance => _instance ??= new T();
     }
-    internal class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
+    public class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
     {
         private static T _instance;
         public static T Instance
         {
             get
             {
+                if(_instance == null) 
+                {
+                    var prefab = Resources.LoadAll<T>("");
+                    if(prefab.Length == 0) 
+                    {
+                        Debug.LogError("Prefab not exist in Resources folder");
+                        return null;
+                    }
+                    _instance = UnityEngine.Object.Instantiate(prefab[0]);
+                    _instance.OnCreateInstance();
+                }
                 return _instance;
             }
         }

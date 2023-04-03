@@ -19,6 +19,7 @@ namespace Tools
             if (count > list.Count) count = list.Count;
             return list.ToList().Shuffle().GetRange(0, count);
         }
+        public static T Last<T>(this List<T> list) => list[list.Count - 1];
         public static List<T> Shuffle<T>(this List<T> list)
         {
             if (list.Count == 0) return default;
@@ -34,13 +35,23 @@ namespace Tools
             }
             return list;
         }
-        public static List<T> Resize<T>(this List<T> list, int size)
+        public static List<T> Resize<T>(this List<T> list, int size, T defaultValue = default)
         {
-            for (int i = 0; i < list.Count + size; i++)
+            int startCount = list.Count;
+            if (startCount > size)
             {
-                list.Add(default);
+                for (int i = startCount - 1; i > size - 1; i--)
+                {
+                    list.RemoveAt(i);
+                }
             }
-            if (list.Count > size) list = list.GetRange(0, size);
+            else
+            {
+                for (int i = 0; i < startCount + size; i++)
+                {
+                    list.Add(defaultValue);
+                }
+            }
             return list;
         }
         public static bool AddIfNotContains<T>(this List<T> list, T element)

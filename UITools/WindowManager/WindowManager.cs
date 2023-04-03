@@ -16,7 +16,7 @@ namespace Tools
                 if (_instance == null)
                 {
                     var managers = Resources.LoadAll<WindowManager>("");
-                    if(managers.Count() == 0) 
+                    if (managers.Count() == 0)
                     {
                         Debug.LogError("Window manager not found");
                         return null;
@@ -98,7 +98,13 @@ namespace Tools
             });
         }
         public void CloseTop() => Close(shownWindows.FindLast(w => w.active == true && w.closeButton != null));
-        public void CloseAll() => shownWindows.ForEach(w => Close(w));
+        public void CloseAll()
+        {
+            foreach (var window in shownWindows)
+            {
+                window.Close();
+            }
+        }
         public T GetOpenedWindow<T>() where T : WindowBase
         {
             T win = (T)shownWindows.Find(w => w is T);

@@ -27,7 +27,8 @@ namespace Tools.Reactive
             }
             set
             {
-                if (value.GetHashCode() != _value.GetHashCode())
+
+                if ((value != null && _value == null) || value?.GetHashCode() != _value?.GetHashCode())
                 {
                     _value = value;
                     actionsAndKeys.ForEach(actionAndKey => actionAndKey.Item1?.Invoke(value));
@@ -80,7 +81,7 @@ namespace Tools.Reactive
     public static class ReactiveUtils
     {
         //SAVES UTILS
-        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
+        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey)
         {
             reactive.GetSave(saveKey);
             reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
@@ -92,16 +93,16 @@ namespace Tools.Reactive
         //     reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
         //     return reactive;
         // }
-        public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey) where T : new()
+        public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey)
         {
             reactive.Unsubscribe(saveKey);
         }
-        public static void Save<T>(this IReactive<T> reactive, string saveKey) where T : new()
+        public static void Save<T>(this IReactive<T> reactive, string saveKey)
         {
             var val = reactive.GetValue();
             PlayerPrefsPro.Set(saveKey, reactive.GetValue());
         }
-        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey) where T : new()
+        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey)
         {
             if (reactive == null) return reactive;
             reactive.SetValue(PlayerPrefsPro.Get<T>(saveKey));

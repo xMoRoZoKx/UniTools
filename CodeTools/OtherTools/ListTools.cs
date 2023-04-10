@@ -65,7 +65,7 @@ namespace Tools
         }
         public static bool HasIndex<T>(this List<T> list, int idx)
         {
-            return list.Count < idx && idx >= 0;
+            return idx < list.Count && idx >= 0;
         }
         public static Presenter<Data, View> Present<Data, View>(this List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : MonoBehaviour
         {

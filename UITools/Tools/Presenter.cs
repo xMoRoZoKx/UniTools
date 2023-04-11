@@ -5,7 +5,32 @@ using UnityEngine;
 
 namespace Tools
 {
-    public class Presenter<Data, View> : IDisposable where View : MonoBehaviour
+    public class SimplePresenter<View> : IDisposable where View : Component
+    {
+        public List<View> views = new List<View>();
+
+        public SimplePresenter<View> Present(int count, View prefab, RectTransform container, Action<View> onShow = null)
+        {
+            views = container.GetComponentsInChildren<View>().ToList();
+            views.ForEach(v => v.SetActive(false));
+            for (int i = 0; i <= count; i++)
+            {
+                if (views.Count <= i)
+                    views.Add(UnityEngine.Object.Instantiate(prefab, container));
+                views[i].SetActive(true);
+                onShow?.Invoke(views[i]);
+            }
+            return this;
+        }
+
+
+        public void Dispose()
+        {
+            views.ForEach(view => view.SetActive(false));
+            views.Clear();
+        }
+    }
+    public class Presenter<Data, View> : IDisposable where View : Component
     {
         public List<View> views = new List<View>();
 

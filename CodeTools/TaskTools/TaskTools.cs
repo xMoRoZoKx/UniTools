@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace Tools
         public static async void Wait(this Component component, float seconds, Action waitEvent)
         {
             await WaitForSeconds(seconds, false);
-            if(component == null) return;
+            if (component == null) return;
             waitEvent?.Invoke();
         }
         public static async void Wait(float time, Action waitEvent, bool playInEditorMode = false)
@@ -20,5 +21,16 @@ namespace Tools
             await WaitForSeconds(time, playInEditorMode);
             waitEvent.Invoke();
         }
+        // public static Task Wait(AsyncOperation operation)
+        // {
+        //     if(operation == null) return WaitForSeconds(0);
+        //     return Task.Run(() =>
+        //     {
+        //         while (!operation.isDone)
+        //         {
+        //             Thread.Sleep(TimeSpan.FromMilliseconds(100));
+        //         }
+        //     });
+        // }
     }
 }

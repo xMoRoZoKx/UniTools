@@ -12,6 +12,7 @@ namespace Tools
         public SimplePresenter<View> Present(int count, View prefab, RectTransform container, Action<View> onShow = null)
         {
             views = container.GetComponentsInChildren<View>().ToList();
+            views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
             views.ForEach(v => v.SetActive(false));
             for (int i = 0; i <= count; i++)
             {
@@ -37,6 +38,7 @@ namespace Tools
         public Presenter<Data, View> Present(List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
         {
             views = container.GetComponentsInChildren<View>().ToList();
+            views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
             views.ForEach(v => v.SetActive(false));
             for (int i = 0; i < list.Count; i++)
             {

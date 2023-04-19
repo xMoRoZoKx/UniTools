@@ -8,8 +8,8 @@ namespace Tools
     public static class TaskTools
     {
         public static readonly TaskController taskController = new TaskController();
-        public static Task WaitForSeconds(float value, bool playInEditorMode = false) => WaitForMilliseconds((long)(value * 1000), playInEditorMode);
-        public static Task WaitForMilliseconds(long value, bool playInEditorMode = false) => taskController.WaitForMilliseconds(value, playInEditorMode);
+        public static Task WaitForSeconds(float value, bool playInEditorMode = false) => WaitForMilliseconds((int)(value * 1000), playInEditorMode);
+        public static Task WaitForMilliseconds(int value, bool playInEditorMode = false) => taskController.WaitForMilliseconds(value, playInEditorMode);
         public static async void Wait(this Component component, float seconds, Action waitEvent)
         {
             await WaitForSeconds(seconds, false);

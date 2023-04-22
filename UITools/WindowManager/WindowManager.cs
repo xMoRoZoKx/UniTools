@@ -102,9 +102,9 @@ namespace Tools
         public void CloseTop() => Close(shownWindows.FindLast(w => w.active == true && w.closeButton != null));
         public void CloseAll()
         {
-            foreach (var window in shownWindows)
+            for (int i = shownWindows.Count - 1; i >= 0 ; i--)
             {
-                window?.Close();
+                shownWindows[i]?.Close();
             }
         }
         public T GetOpenedWindow<T>() where T : WindowBase

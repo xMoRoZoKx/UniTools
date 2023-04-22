@@ -7,6 +7,14 @@ namespace Tools
 {
     public static class TaskTools
     {
+        public static async Task Delay(int millisecondsDelay)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            await Task.Delay(millisecondsDelay);
+
+            tcs.SetResult(true);
+            await tcs.Task;
+        }
         public static readonly TaskController taskController = new TaskController();
         public static Task WaitForSeconds(float value, bool playInEditorMode = false) => WaitForMilliseconds((int)(value * 1000), playInEditorMode);
         public static Task WaitForMilliseconds(int value, bool playInEditorMode = false) => taskController.WaitForMilliseconds(value, playInEditorMode);

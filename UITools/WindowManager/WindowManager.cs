@@ -26,21 +26,23 @@ namespace Tools
                 return _instance;
             }
         }
-        public Transform root;
+        [SerializeField] private Transform root;
+        [SerializeField] private bool useDontDestroyOnLoad = true;
         public Canvas canvas { get; private set; }
         private List<WindowBase> prefabs;
         private List<WindowBase> freeWindows = new List<WindowBase>();
         private List<WindowBase> shownWindows = new List<WindowBase>();
         private void Awake()
         {
-            if (_instance == null)
-            {
-                _instance = this;
-                canvas = GetComponent<Canvas>();
-                prefabs = Resources.LoadAll<WindowBase>("").ToList();
-                DontDestroyOnLoad(this);
-            }
-            else Destroy(gameObject);
+            SetNewInstance(this);
+            if (useDontDestroyOnLoad) DontDestroyOnLoad(this);
+        }
+        private void SetNewInstance(WindowManager instance)
+        {
+            if (_instance != null && _instance != instance) Destroy(_instance.gameObject);
+            _instance = instance;
+            instance.canvas = instance.GetComponent<Canvas>();
+            instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
         }
         public T Show<T>() where T : WindowBase
         {
@@ -102,7 +104,7 @@ namespace Tools
         public void CloseTop() => Close(shownWindows.FindLast(w => w.active == true && w.closeButton != null));
         public void CloseAll()
         {
-            for (int i = shownWindows.Count - 1; i >= 0 ; i--)
+            for (int i = shownWindows.Count - 1; i >= 0; i--)
             {
                 shownWindows[i]?.Close();
             }

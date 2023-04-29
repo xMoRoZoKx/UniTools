@@ -35,7 +35,7 @@ namespace Tools
     {
         public List<View> views = new List<View>();
 
-        public Presenter<Data, View> Present(List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
+        public Presenter<Data, View> Present(IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
         {
             views = container.GetComponentsInChildren<View>().ToList();
             views.RemoveAll(v => v.GetComponent<PresenterIgnore>());

@@ -19,6 +19,16 @@ namespace Tools
             if (count > list.Count) count = list.Count;
             return list.ToList().Shuffle().GetRange(0, count);
         }
+        public static void Remove<T>(this List<T> list, Predicate<T> match)
+        {
+            for(int i = 0; i < list.Count; i++) {
+                if(match.Invoke(list[i])) 
+                {
+                    list.Remove(list[i]);
+                    return;
+                }
+            }
+        }
         public static T Last<T>(this List<T> list) => list[list.Count - 1];
         public static List<T> Shuffle<T>(this List<T> list)
         {
@@ -67,7 +77,7 @@ namespace Tools
         {
             return idx < list.Count && idx >= 0;
         }
-        public static Presenter<Data, View> Present<Data, View>(this List<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : MonoBehaviour
+        public static Presenter<Data, View> Present<Data, View>(this IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : MonoBehaviour
         {
             var presenter = new Presenter<Data, View>();
             if (list is ReactiveList<Data> reactiveList)

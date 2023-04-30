@@ -8,6 +8,15 @@ namespace Tools
 {
     public static class ListTools
     {
+        public static ReactiveList<T> ToReactiveList<T>(this IEnumerable<T> source)
+        {
+            var reactiveList = new ReactiveList<T>();
+            foreach (var s in source)
+            {
+                reactiveList.Add(s);
+            }
+            return reactiveList;
+        }
         public static T GetRandom<T>(this List<T> list)
         {
             if (list.Count == 0) return default;
@@ -21,8 +30,9 @@ namespace Tools
         }
         public static void Remove<T>(this List<T> list, Predicate<T> match)
         {
-            for(int i = 0; i < list.Count; i++) {
-                if(match.Invoke(list[i])) 
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (match.Invoke(list[i]))
                 {
                     list.Remove(list[i]);
                     return;

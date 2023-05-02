@@ -92,7 +92,7 @@ namespace Tools
             var presenter = new Presenter<Data, View>();
             if (list is ReactiveList<Data> reactiveList)
             {
-                reactiveList.Subscribe(data => presenter.Present(data, prefab, container, onShow));
+               presenter.connections += reactiveList.Subscribe(data => presenter.Present(data, prefab, container, onShow));
             }
             presenter.Present(list, prefab, container, onShow);
             return presenter;

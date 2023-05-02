@@ -33,8 +33,8 @@ namespace Tools
     }
     public class Presenter<Data, View> : IDisposable where View : Component
     {
-        public List<View> views = new List<View>();
-
+        public List<View> views { private set; get; } = new List<View>();
+        public Connections connections = new Connections();
         public Presenter<Data, View> Present(IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
         {
             views = container.GetComponentsInChildren<View>().ToList();
@@ -53,6 +53,7 @@ namespace Tools
 
         public void Dispose()
         {
+            connections.DisconnectAll();
             views.ForEach(view => view.SetActive(false));
             views.Clear();
         }

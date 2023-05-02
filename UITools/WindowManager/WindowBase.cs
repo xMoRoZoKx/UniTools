@@ -7,6 +7,7 @@ namespace Tools
     public class WindowBase : MonoBehaviour
     {
         public Button closeButton;
+        protected Connections connections = new Connections();
         public bool isReusableView = true;
         [HideInInspector] public UnityEvent onClose = new UnityEvent();
         [HideInInspector] public bool active = false;

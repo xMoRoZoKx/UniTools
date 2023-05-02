@@ -18,7 +18,7 @@ namespace Tools.Reactive
             _value = value;
         }
         T _value;
-        List<(Action<T>, string)> actionsAndKeys = new List<(Action<T>, string)>();
+        EventStream<T> eventStream = new EventStream<T>();
         public T value
         {
             get
@@ -31,33 +31,20 @@ namespace Tools.Reactive
                 if ((value != null && _value == null) || value?.GetHashCode() != _value?.GetHashCode())
                 {
                     _value = value;
-                    actionsAndKeys.ForEach(actionAndKey => actionAndKey.Item1?.Invoke(value));
+                    eventStream.Invoke(value);
                 }
             }
         }
-        public void SubscribeAndInvoke(Action<T> onChangedEvent)
+        public IDisposable SubscribeAndInvoke(Action<T> onChangedEvent)
         {
             onChangedEvent.Invoke(_value);
-            Subscribe(onChangedEvent);
+            return Subscribe(onChangedEvent);
         }
-        public void SubscribeWithKey(Action<T> onChangedEvent, string key)
-        {
-            if (actionsAndKeys.Any(act => act.Item2 == key))
-            {
-                Debug.LogError("this key exist!");
-                return;
-            }
-            actionsAndKeys.Add((onChangedEvent, key));
-        }
-        public void Subscribe(Action<T> onChangedEvent) => SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
-        public void Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
-        public void Unsubscribe(string key)
-        {
-            actionsAndKeys.RemoveAll(act => act.Item2 == key);
-        }
+        public IDisposable Subscribe(Action<T> onChangedEvent) => eventStream.Subscribe(onChangedEvent);
+        public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void UnsubscribeAll()
         {
-            actionsAndKeys.Clear();
+            eventStream.DisonnectAll();
         }
 
         public T GetValue() => value;
@@ -71,11 +58,9 @@ namespace Tools.Reactive
     {
         public T GetValue();
         public void SetValue(T value);
-        public void SubscribeAndInvoke(Action<T> onChangedEvent);
-        public void SubscribeWithKey(Action<T> onChangedEvent, string key);
-        public void Subscribe(Action<T> onChangedEvent) => SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
-        public void Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
-        public void Unsubscribe(string key);
+        public IDisposable SubscribeAndInvoke(Action<T> onChangedEvent);
+        public IDisposable Subscribe(Action<T> onChangedEvent);
+        public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void UnsubscribeAll();
     }
     public static class ReactiveUtils
@@ -84,18 +69,11 @@ namespace Tools.Reactive
         public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey)
         {
             reactive.GetSave(saveKey);
-            reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
+            reactive.SubscribeAndInvoke(value => reactive.Save(saveKey));
         }
-        // public static Reactive GetSaverValue<Reactive>(string saveKey) where Reactive : IReactive<>, new()
-        // {
-        //     var reactive = new Reactive();
-        //     reactive.GetSave(saveKey);
-        //     reactive.SubscribeWithKey(value => reactive.Save(saveKey), saveKey);
-        //     return reactive;
-        // }
         public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey)
         {
-            reactive.Unsubscribe(saveKey);
+            // reactive.Unsubscribe(saveKey);
         }
         public static void Save<T>(this IReactive<T> reactive, string saveKey)
         {

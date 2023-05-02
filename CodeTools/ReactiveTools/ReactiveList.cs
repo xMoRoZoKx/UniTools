@@ -118,4 +118,11 @@ namespace Tools.Reactive
     {
         public void SubscribeForEach(Action<T, ReactiveCollectionEventType> onChangeElement);
     }
+    public class AutoSaverList<T> : ReactiveList<T>
+    {
+        public AutoSaverList(string key)
+        {
+            this.ConnectToSaver(key);
+        }
+    }
 }

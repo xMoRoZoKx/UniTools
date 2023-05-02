@@ -131,4 +131,11 @@ namespace Tools.Reactive
             public T Value;
         }
     }
+    public class AutoSaver<T> : Reactive<T>
+    {
+        public AutoSaver(string key)
+        {
+            this.ConnectToSaver(key);
+        }
+    }
 }

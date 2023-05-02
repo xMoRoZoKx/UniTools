@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Tools;
 using UnityEngine;
-using UnityEngine.EventSystems;
+// using UnityEngine.EventSystems;
 
 namespace Tools
 {
@@ -36,7 +36,7 @@ namespace Tools
         private void Awake()
         {
             SetNewInstance(this);
-            if (FindObjectOfType<EventSystem>()) GetComponent<EventSystem>().enabled = false;
+            // if (FindObjectOfType<EventSystem>()) GetComponent<EventSystem>().enabled = false;
             if (useDontDestroyOnLoad) DontDestroyOnLoad(this);
         }
         private void SetNewInstance(WindowManager instance)
@@ -90,6 +90,7 @@ namespace Tools
             if (!win) return;
             win.onClose.Invoke();
             win.onClose.RemoveAllListeners();
+            win.connections.DisconnectAll();
             win.active = false;
             TaskTools.Wait(win.CloseAnimation(), () =>
             {

@@ -28,16 +28,18 @@ namespace Tools
             if (count > list.Count) count = list.Count;
             return list.ToList().Shuffle().GetRange(0, count);
         }
-        public static void Remove<T>(this List<T> list, Predicate<T> match)
+        public static T Remove<T>(this List<T> list, Predicate<T> match)
         {
             for (int i = 0; i < list.Count; i++)
             {
                 if (match.Invoke(list[i]))
                 {
-                    list.Remove(list[i]);
-                    return;
+                    var item = list[i];
+                    list.Remove(item);
+                    return item;
                 }
             }
+            return default;
         }
         public static T Last<T>(this List<T> list) => list[list.Count - 1];
         public static List<T> Shuffle<T>(this List<T> list)

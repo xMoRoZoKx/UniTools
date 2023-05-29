@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Tools
 {
     [RequireComponent(typeof(Canvas))]
-    internal class WindowManager : MonoBehaviour
+    public class WindowManager : MonoBehaviour
     {
         private static WindowManager _instance;
         public static WindowManager Instance

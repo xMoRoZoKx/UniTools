@@ -1,9 +1,10 @@
 using System;
-using Tools;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public static class MonobehaviorTools
+public static class GameTools
 {
     public static void SetActive(this Component component, bool value)
     {
@@ -84,5 +85,15 @@ public static class MonobehaviorTools
         var scale = renderer.transform.localScale / rotPixel;
 
         renderer.transform.localScale = new Vector3(scale.x * rotX, scale.y * rotY, 0);
+    }
+    public static string ToTimerFormat(this int time) => ToTimerFormat((float)time);
+    public static string ToTimerFormat(this long time) => ToTimerFormat((float)time);
+    public static string ToTimerFormat(this double time) => ToTimerFormat((float)time);
+    public static string ToTimerFormat(this float time)
+    {
+        var hour = (int)(time / 60 / 60);
+        var min = (int)(time / 60) - (hour * 60);
+        var sec = (int)(time % 60);
+        return (hour > 0 ? (hour < 10 ? "0" : "") + hour + ":" : "") + (min < 10 ? "0" : "") + min + ":" + (sec < 10 ? "0" : "") + sec;
     }
 }

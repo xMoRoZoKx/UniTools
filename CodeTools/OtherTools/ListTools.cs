@@ -22,6 +22,12 @@ namespace Tools
             if (list.Count == 0) return default;
             return list[UnityEngine.Random.Range(0, list.Count())];
         }
+        public static void ForEach<T>(this T[] arr, Action<T> action)
+        {
+            if (arr == null) return;
+            for (int i = 0; i < arr.Length; i++)
+                action(arr[i]);
+        }
         public static List<T> GetRandoms<T>(this List<T> list, int count)
         {
             if (list.Count == 0) return default;
@@ -94,7 +100,7 @@ namespace Tools
             var presenter = new Presenter<Data, View>();
             if (list is ReactiveList<Data> reactiveList)
             {
-               presenter.connections += reactiveList.Subscribe(data => presenter.Present(data, prefab, container, onShow));
+                presenter.connections += reactiveList.Subscribe(data => presenter.Present(data, prefab, container, onShow));
             }
             presenter.Present(list, prefab, container, onShow);
             return presenter;

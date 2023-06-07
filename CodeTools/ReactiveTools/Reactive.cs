@@ -17,7 +17,7 @@ namespace Tools.Reactive
         {
             _value = value;
         }
-        T _value;
+        protected T _value;
         EventStream<T> eventStream = new EventStream<T>();
         public T value
         {
@@ -111,9 +111,18 @@ namespace Tools.Reactive
     }
     public class AutoSaver<T> : Reactive<T>
     {
+        public string key { get; private set; }
         public AutoSaver(string key)
         {
+            this.key = key;
             this.ConnectToSaver(key);
         }
+        public AutoSaver(string key, T value)
+        {
+            if (!PlayerPrefsPro.HasKey(key)) _value = value;
+            this.key = key;
+            this.ConnectToSaver(key);
+        }
+        public void Save() => this.Save(key);
     }
 }

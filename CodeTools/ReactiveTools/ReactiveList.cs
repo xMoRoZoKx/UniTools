@@ -47,11 +47,9 @@ namespace Tools.Reactive
         }
         public new void Clear()
         {
-            for (int i = 0; i < Count; i++)
+            for (int i = Count - 1; i >= 0; i--)
             {
                 RemoveAt(0);
-                InvokeElementEvents(base[0], CollectionEvent.Remove);
-                InvokeListEvents();
             }
         }
 

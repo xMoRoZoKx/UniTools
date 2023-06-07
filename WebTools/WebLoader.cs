@@ -84,10 +84,11 @@ namespace Tools
                 getTextEvent(request.downloadHandler.text);
             }
         }
-        public static IEnumerator LoadGoogleTable(string url, Action<GoogleTable> getTableEvent)
+        public static IEnumerator LoadGoogleTable(string sheetId, string gid, Action<GoogleTable> getTableEvent)
         {
-            string text = "";
-            yield return LoadText(url, txt => text = txt);
+            string text = "";//ttps://docs.google.com/spreadsheets/d/KEY/export?format=csv&gid=SHEET_ID
+            //https://docs.google.com/spreadsheets/d/{key}{sheet_name}
+            yield return LoadText("https://docs.google.com/spreadsheets/d/" + sheetId + "/gviz/tq?tqx=out:csv&sheet=" + gid, txt => text = txt);
             getTableEvent(new GoogleTable(text));
         }
     }

@@ -1,28 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Tools;
 using UnityEngine;
 public class Row
 {
-    private List<string> cells;
-    private List<string> headerCells;
-    public Row(string data)
+    public List<string> cells;
+    public Row header;
+    public Row(string data, Row header = null)
     {
+        this.header = header;
         cells = GoogleTableParser.GetCells(data).ToList();
+        for(int i = 0; i < cells.Count; i++) {
+            cells[i] = cells[i].Remove(0, 1);
+            cells[i] = cells[i].Remove(cells[i].Length - 1);
+        }
     }
-    public string GetCell(int idx)
+    public string GetCell(string columnName)
     {
+        int idx = header.cells.FindIndex(c => c == columnName);
+        if (!cells.HasIndex(idx)) return null;
         return cells[idx];
     }
-    // public string GetCell(string columnName)
-    // {
-    //     return cells.Find();
-    // }
 }
 public class GoogleTable
 {
     string _data;
-    private List<Row> rows = new List<Row>();
+    public List<Row> rows { get; private set; } = new List<Row>();
     public GoogleTable(string data)
     {
         SetData(data);
@@ -32,25 +36,26 @@ public class GoogleTable
     {
         _data = data;
         rows.Clear();
-        GoogleTableParser.GetRows(data).ToList().ForEach(textRow => rows.Add(new Row(textRow)));
+        GoogleTableParser.GetRows(data).ToList().ForEach(textRow =>
+        {
+            var header = rows.Count == 0 ? new Row(textRow) : rows[0].header;
+            rows.Add(new Row(textRow, header));
+        });
     }
 }
 public static class GoogleTableParser
 {
-    public const char CellSeporator = ',';
-    public const char InCellSeporator = ';';
-
-    public static string[] GetRows(string data)
+    public static string[] GetRows(this string data)
     {
-        return data.Split(GoogleTableParser.GetPlatformSpecificLineEnd());
+        return data.Split(GoogleTableParser.PlatformLineEnd());
     }
-    public static string[] GetCells(string rowData)
+    public static string[] GetCells(this string rowData)
     {
-        return rowData.Split(GoogleTableParser.CellSeporator);
+        return rowData.Split(',');
     }
-    public static Vector3 ParseVector3(string s)
+    public static Vector3 ParseVector3(this string s)
     {
-        string[] vectorComponents = s.Split(InCellSeporator);
+        string[] vectorComponents = s.Split(';');
         if (vectorComponents.Length < 3)
         {
             Debug.Log("Can't parse Vector3. Wrong text format");
@@ -63,7 +68,7 @@ public static class GoogleTableParser
         return new Vector3(x, y, z);
     }
 
-    public static int ParseInt(string s)
+    public static int ParseInt(this string s)
     {
         int result = -1;
         if (!int.TryParse(s, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.GetCultureInfo("en-US"), out result))
@@ -74,7 +79,13 @@ public static class GoogleTableParser
         return result;
     }
 
-    public static float ParseFloat(string s)
+    public static bool ParseBool(this string s)
+    {
+        if (s == null) return false;
+        s = s.ToLower();
+        return s == "false" || s == "true" || s == "истина" || s == "ложь";
+    }
+    public static float ParseFloat(this string s)
     {
         float result = -1;
         if (!float.TryParse(s, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.GetCultureInfo("en-US"), out result))
@@ -85,7 +96,7 @@ public static class GoogleTableParser
         return result;
     }
 
-    public static char GetPlatformSpecificLineEnd()
+    private static char PlatformLineEnd()
     {
         char lineEnding = '\n';
 #if UNITY_IOS

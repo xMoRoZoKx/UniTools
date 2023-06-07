@@ -13,7 +13,7 @@ namespace Tools
     }
     public class SingletonBehavior<T> : MonoBehaviour where T : SingletonBehavior<T>, new()
     {
-        private static T _instance;
+        protected static T _instance;
         public static T Instance
         {
             get

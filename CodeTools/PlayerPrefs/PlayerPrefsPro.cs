@@ -27,8 +27,6 @@ namespace Tools.PlayerPrefs
         private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
         {
             SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key, layerName);
-            if (needAddToLayersList) TryAddNewLayer(layerName);
-            if (needAddToKeysList) TryAddNewKey(key, layerName);
         }
         public static T Get<T>(string key, string layerName = BASE_LAYER)
         {
@@ -39,10 +37,13 @@ namespace Tools.PlayerPrefs
             if (String.IsNullOrEmpty(json)) return default;
             return JsonUtility.FromJson<Json<T>>(json).value;
         }
-        public static void SetBytes(this byte[] bytes, string key, string layerName = BASE_LAYER)
+        public static void SetBytes(this byte[] bytes, string key, string layerName = BASE_LAYER) => SetBytes(bytes, key, true, true, layerName);
+        private static void SetBytes(this byte[] bytes, string key, bool needAddToKeysList, bool needAddToLayersList, string layerName = BASE_LAYER)
         {
             key = GetKey(key);
             File.WriteAllBytes(Patch(layerName) + key, bytes);
+            if (needAddToLayersList) TryAddNewLayer(layerName);
+            if (needAddToKeysList) TryAddNewKey(key, layerName);
         }
         public static byte[] GetBytes(string key, string layerName = BASE_LAYER)
         {

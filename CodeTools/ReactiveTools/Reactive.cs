@@ -66,20 +66,20 @@ namespace Tools.Reactive
     public static class ReactiveUtils
     {
         //SAVES UTILS
-        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey)
+        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {
-            reactive.GetSave(saveKey);
-            reactive.SubscribeAndInvoke(value => reactive.Save(saveKey));
+            reactive.GetSave(saveKey, layer);
+            reactive.SubscribeAndInvoke(value => reactive.Save(saveKey, layer));
         }
-        public static void Save<T>(this IReactive<T> reactive, string saveKey)
+        public static void Save<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {
             var val = reactive.GetValue();
-            PlayerPrefsPro.Set(saveKey, reactive.GetValue());
+            PlayerPrefsPro.Set(saveKey, reactive.GetValue(), layer);
         }
-        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey)
+        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {
             if (reactive == null) return reactive;
-            reactive.SetValue(PlayerPrefsPro.Get<T>(saveKey));
+            reactive.SetValue(PlayerPrefsPro.Get<T>(saveKey, layer));
             return reactive;
         }
         //JSON UTILS
@@ -104,21 +104,5 @@ namespace Tools.Reactive
             }
             public T Value;
         }
-    }
-    public class AutoSaver<T> : Reactive<T>
-    {
-        public string key { get; private set; }
-        public AutoSaver(string key)
-        {
-            this.key = key;
-            this.ConnectToSaver(key);
-        }
-        public AutoSaver(string key, T value)
-        {
-            if (!PlayerPrefsPro.HasKey(key)) _value = value;
-            this.key = key;
-            this.ConnectToSaver(key);
-        }
-        public void Save() => this.Save(key);
     }
 }

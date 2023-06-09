@@ -101,14 +101,4 @@ namespace Tools.Reactive
     {
         public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement);
     }
-    public class AutoSaverList<T> : ReactiveList<T>
-    {
-        public string key { get; private set; }
-        public AutoSaverList(string key)
-        {
-            this.key = key;
-            this.ConnectToSaver(key);
-        }
-        public void Save() => this.Save(key);
-    }
 }

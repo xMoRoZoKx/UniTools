@@ -18,6 +18,7 @@ public static class ScaneManagmentTools
     }
     static IEnumerator LoadAsyncScene(AsyncOperation asyncLoad, Action onComplete)
     {
+        if(asyncLoad == null) yield break;
         asyncLoad.allowSceneActivation = false;
         while (!asyncLoad.isDone)
         {

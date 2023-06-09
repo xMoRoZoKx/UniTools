@@ -71,10 +71,6 @@ namespace Tools.Reactive
             reactive.GetSave(saveKey);
             reactive.SubscribeAndInvoke(value => reactive.Save(saveKey));
         }
-        public static void DisonnectSaver<T>(this IReactive<T> reactive, string saveKey)
-        {
-            // reactive.Unsubscribe(saveKey);
-        }
         public static void Save<T>(this IReactive<T> reactive, string saveKey)
         {
             var val = reactive.GetValue();

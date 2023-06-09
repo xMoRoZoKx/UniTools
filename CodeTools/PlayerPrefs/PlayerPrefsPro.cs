@@ -17,14 +17,18 @@ namespace Tools.PlayerPrefs
             }
             public T value;
         }
-        public const string BASE_LAYER = "BASE";
-        public static string Patch(string layerName = BASE_LAYER) => Application.persistentDataPath + "/" + layerName;
+        public const string BASE_LAYER = "BASE", ALL_KEYS = "_ALL_KEYS", ALL_LAYERS = "_ALL_LAYERS", CONSTANT_LAYER = "CONST_LAYER";
+        public static string Patch(string layerName = BASE_LAYER)
+        {
+            return Application.persistentDataPath + "/" + layerName;
+        }
         public static string GetKey(string key) => key.Trim('/');
-        public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set<T>(key, layerName, obj, true);
-        private static void Set<T>(string key, string layerName, T obj, bool saveKey)
+        public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set<T>(key, layerName, obj, true, true);
+        private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
         {
             SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key, layerName);
-            if (saveKey) TryAddNewKey(key, layerName);
+            if (needAddToLayersList) TryAddNewLayer(layerName);
+            if (needAddToKeysList) TryAddNewKey(key, layerName);
         }
         public static T Get<T>(string key, string layerName = BASE_LAYER)
         {
@@ -33,7 +37,6 @@ namespace Tools.PlayerPrefs
 
             string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
             if (String.IsNullOrEmpty(json)) return default;
-            // if(json[json.Length - 1] != '}') json += '}';
             return JsonUtility.FromJson<Json<T>>(json).value;
         }
         public static void SetBytes(this byte[] bytes, string key, string layerName = BASE_LAYER)
@@ -83,7 +86,7 @@ namespace Tools.PlayerPrefs
 
         private static List<string> GetAllKeys(string layerName)
         {
-            return Get<List<string>>(layerName + "_ALL_KEYS");
+            return Get<List<string>>(layerName + ALL_KEYS, CONSTANT_LAYER);
         }
         private static void TryAddNewKey(string newKey, string layerName)
         {
@@ -91,7 +94,19 @@ namespace Tools.PlayerPrefs
             if (keys == null) keys = new List<string>();
             if (keys.Contains(newKey)) return;
             keys.Add(newKey);
-            Set<List<string>>(layerName + "_ALL_KEYS", layerName, keys, false);
+            Set<List<string>>(layerName + ALL_KEYS, CONSTANT_LAYER, keys, false, false);
+        }
+        private static List<string> GetAllLayers()
+        {
+            return Get<List<string>>(ALL_LAYERS, CONSTANT_LAYER);
+        }
+        private static void TryAddNewLayer(string newLayer)
+        {
+            var layers = GetAllLayers();
+            if (layers == null) layers = new List<string>();
+            if (layers.Contains(newLayer)) return;
+            layers.Add(newLayer);
+            Set<List<string>>(ALL_LAYERS, CONSTANT_LAYER, layers, false, false);
         }
         public static void DeleteSave(string key, string layerName = BASE_LAYER)
         {
@@ -99,7 +114,7 @@ namespace Tools.PlayerPrefs
             if (!HasKey(key, layerName)) return;
             var keys = GetAllKeys(layerName);
             File.Delete(Patch(layerName) + keys.Find(k => k == key));
-            Set<List<string>>(layerName + "_ALL_KEYS", layerName, keys, false);
+            Set<List<string>>(layerName + ALL_KEYS, layerName, keys, false, false);
         }
 #if UNITY_EDITOR
         [MenuItem("PlayerPrefsPro/Clear")]
@@ -107,12 +122,20 @@ namespace Tools.PlayerPrefs
         public static void DeleteDefaulSaves()
         {
             GetAllKeys(BASE_LAYER)?.ForEach(key => File.Delete(Patch(BASE_LAYER) + key));
-            Set<List<string>>(BASE_LAYER + "_ALL_KEYS", BASE_LAYER, new List<string>(), false);
+            Set<List<string>>(BASE_LAYER + ALL_KEYS, BASE_LAYER, new List<string>(), false, false);
         }
         public static void DeleteAllSaves(string layerName = BASE_LAYER)
         {
             GetAllKeys(layerName)?.ForEach(key => File.Delete(Patch(layerName) + key));
-            Set<List<string>>(layerName + "_ALL_KEYS", layerName, new List<string>(), false);
+            Set<List<string>>(layerName + ALL_KEYS, layerName, new List<string>(), false, false);
+        }
+#if UNITY_EDITOR
+        [MenuItem("PlayerPrefsPro/Delete All Layers")]
+#endif
+        public static void DeleteAllLayers()
+        {
+            GetAllLayers()?.ForEach(layer => DeleteAllSaves(layer));
+            Set<List<string>>(ALL_LAYERS, CONSTANT_LAYER, new List<string>(), false, false);
         }
     }
 }

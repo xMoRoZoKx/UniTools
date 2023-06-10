@@ -30,8 +30,8 @@ namespace Tools.Reactive
 
                 if ((value != null && _value == null) || value?.GetHashCode() != _value?.GetHashCode())
                 {
-                    _value = value;
                     eventStream.Invoke(value);
+                    _value = value;
                 }
             }
         }
@@ -41,6 +41,10 @@ namespace Tools.Reactive
             return Subscribe(onChangedEvent);
         }
         public IDisposable Subscribe(Action<T> onChangedEvent) => eventStream.Subscribe(onChangedEvent);
+        public IDisposable Buffer(Action<T, T> old_New) => eventStream.Subscribe(newVal =>
+        {
+            old_New.Invoke(_value, newVal);
+        });
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void UnsubscribeAll()
         {

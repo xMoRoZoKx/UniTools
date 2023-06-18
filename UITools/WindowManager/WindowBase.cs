@@ -6,10 +6,11 @@ namespace Tools
 {
     public class WindowBase : MonoBehaviour
     {
-        public Button closeButton;
+        [field: SerializeField] public Button closeButton { get; private set; }
         public Connections connections = new Connections();
-        public bool isReusableView = true;
-        [HideInInspector] public UnityEvent onClose = new UnityEvent();
+        [field: SerializeField] public bool isReusableView { get; private set; } = true;
+        [field: SerializeField] public bool isTopWindow { get; private set; } = false;
+        public EventStream onClose { get; private set; } = new EventStream();
         [HideInInspector] public bool active = false;
         protected virtual void Awake()
         {
@@ -27,6 +28,6 @@ namespace Tools
         {
             return 0;
         }
-        public virtual void OnOpened(){}
+        public virtual void OnOpened() { }
     }
 }

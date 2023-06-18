@@ -18,7 +18,7 @@ namespace Tools.Reactive
             _value = value;
         }
         protected T _value;
-        EventStream<T> eventStream = new EventStream<T>();
+        EventStream<(T, T)> eventStream = new EventStream<(T, T)>();
         public T value
         {
             get
@@ -30,8 +30,9 @@ namespace Tools.Reactive
 
                 if ((value != null && _value == null) || value?.GetHashCode() != _value?.GetHashCode())
                 {
-                    eventStream.Invoke(value);
+                    var oldVal = _value;
                     _value = value;
+                    eventStream.Invoke((oldVal, value));
                 }
             }
         }
@@ -40,10 +41,13 @@ namespace Tools.Reactive
             onChangedEvent.Invoke(_value);
             return Subscribe(onChangedEvent);
         }
-        public IDisposable Subscribe(Action<T> onChangedEvent) => eventStream.Subscribe(onChangedEvent);
-        public IDisposable Buffer(Action<T, T> old_New) => eventStream.Subscribe(newVal =>
+        public IDisposable Subscribe(Action<T> onChangedEvent) => eventStream.Subscribe(val =>
         {
-            old_New.Invoke(_value, newVal);
+            onChangedEvent(val.Item2);
+        });
+        public IDisposable Buffer(Action<T, T> old_New) => eventStream.Subscribe(val =>
+        {
+            old_New(val.Item1, val.Item2);
         });
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void UnsubscribeAll()

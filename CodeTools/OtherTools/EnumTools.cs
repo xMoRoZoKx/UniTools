@@ -21,7 +21,7 @@ namespace Tools
             }
             return false;
         }
-        public static T GetRandomEnum<T>() where T : Enum
+        public static T GetRandomType<T>() where T : Enum
         {
             var enums = Enum.GetValues(typeof(T));
             return (T)enums.GetValue(UnityEngine.Random.Range(0, enums.Length));

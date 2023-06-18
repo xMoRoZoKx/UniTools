@@ -58,30 +58,30 @@ namespace Tools
             };
             if (freeWindows.Count > 0 && windowPrefab.isReusableView)
             {
-                return ShowExistView((T)freeWindows[0]);
+                return ShowExistView((T)freeWindows.Find(w => typeof(T) == w.GetType()));
             }
             return CreateView((T)windowPrefab);
         }
         private T ShowExistView<T>(T window) where T : WindowBase
         {
-            // GetOpenedWindow<T>()?.Close();
-            window.gameObject.SetActive(true);
-            window.transform.SetSiblingIndex(root.childCount - 1);
-            window.OnOpened();
-            window.ShowAnimation();
-            window.active = true;
-            shownWindows.Add(window);
+            Show(window);
             freeWindows.Remove(window);
             return (T)window;
         }
         private T CreateView<T>(T windowPrefab) where T : WindowBase
         {
             var window = Instantiate(windowPrefab, root);
+            Show(window);
+            return (T)window;
+        }
+        private void Show<T>(T window) where T : WindowBase
+        {
+            window.gameObject.SetActive(true);
+            window.transform.SetSiblingIndex(window.isTopWindow ? root.childCount - 1 : shownWindows.FindAll(w => !w.isTopWindow).Count);//root.childCount - 1);
             window.OnOpened();
             window.ShowAnimation();
             shownWindows.Add(window);
             window.active = true;
-            return (T)window;
         }
         public void Close(WindowBase closeWindow)
         {
@@ -89,7 +89,7 @@ namespace Tools
             var win = shownWindows.FindLast(w => w == closeWindow);
             if (!win) return;
             win.onClose.Invoke();
-            win.onClose.RemoveAllListeners();
+            // win.onClose.RemoveAllListeners();
             win.connections.DisconnectAll();
             win.active = false;
             TaskTools.Wait(win.CloseAnimation(), () =>

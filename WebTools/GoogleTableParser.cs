@@ -83,7 +83,7 @@ public static class GoogleTableParser
     {
         if (s == null) return false;
         s = s.ToLower();
-        return s == "false" || s == "true" || s == "истина" || s == "ложь";
+        return s == "true" || s == "истина";
     }
     public static float ParseFloat(this string s)
     {

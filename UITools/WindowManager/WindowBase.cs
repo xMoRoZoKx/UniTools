@@ -9,7 +9,8 @@ namespace Tools
         [field: SerializeField] public Button closeButton { get; private set; }
         public Connections connections = new Connections();
         [field: SerializeField] public bool isReusableView { get; private set; } = true;
-        [field: SerializeField] public bool isTopWindow { get; private set; } = false;
+        [field: SerializeField] public bool needHideThenWindowIsNotTop { get; private set; } = false;
+        [field: SerializeField] public bool isPriorityWindow  { get; private set; } = false;
         public EventStream onClose { get; private set; } = new EventStream();
         [HideInInspector] public bool active = false;
         protected virtual void Awake()

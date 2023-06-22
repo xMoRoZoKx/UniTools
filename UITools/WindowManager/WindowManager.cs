@@ -77,7 +77,7 @@ namespace Tools
         private void Show<T>(T window) where T : WindowBase
         {
             window.gameObject.SetActive(true);
-            window.transform.SetSiblingIndex(window.isTopWindow ? root.childCount - 1 : shownWindows.FindAll(w => !w.isTopWindow).Count);//root.childCount - 1);
+            window.transform.SetSiblingIndex(window.isPriorityWindow  ? root.childCount - 1 : shownWindows.FindAll(w => !w.isPriorityWindow ).Count);//root.childCount - 1);
             window.OnOpened();
             window.ShowAnimation();
             shownWindows.Add(window);

@@ -18,6 +18,7 @@ namespace Tools.Reactive
             _value = value;
         }
         protected T _value;
+        protected int lastSetedHash;
         EventStream<(T, T)> eventStream = new EventStream<(T, T)>();
         public T value
         {
@@ -33,6 +34,7 @@ namespace Tools.Reactive
                     var oldVal = _value;
                     _value = value;
                     eventStream.Invoke((oldVal, value));
+                    lastSetedHash = _value != null ? _value.GetHashCode() : 0;
                 }
             }
         }
@@ -61,6 +63,11 @@ namespace Tools.Reactive
         {
             this.value = value;
         }
+
+        public bool HasChanges()
+        {
+            return lastSetedHash != _value.GetHashCode();
+        }
     }
     public interface IReactive<T>
     {
@@ -70,14 +77,24 @@ namespace Tools.Reactive
         public IDisposable Subscribe(Action<T> onChangedEvent);
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void UnsubscribeAll();
+        public bool HasChanges();
     }
     public static class ReactiveUtils
     {
         //SAVES UTILS
+        // private static async void SaveEachSeconds<T>(this IReactive<T> reactive, string key, float timeOut = 1)// IN TESTING
+        // {
+        //     while (reactive != null)
+        //     {
+        //         if(reactive.HasChanges()) reactive.Save(key);
+        //         await TaskTools.WaitForSeconds(timeOut);
+        //     }
+        // }
         public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {
             reactive.GetSave(saveKey, layer);
             reactive.SubscribeAndInvoke(value => reactive.Save(saveKey, layer));
+            // reactive.SaveEachSeconds(saveKey); // IN TESTING
         }
         public static void Save<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {

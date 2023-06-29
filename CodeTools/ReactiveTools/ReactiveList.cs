@@ -16,7 +16,7 @@ namespace Tools.Reactive
     {
         private EventStream<(T, CollectionEvent)> _eventsForEach = new EventStream<(T, CollectionEvent)>();
         EventStream<List<T>> eventStream = new EventStream<List<T>>();
-
+        public int lastSetedHash = 0;
         public new T this[int index]
         {
             get => base[index];
@@ -27,6 +27,7 @@ namespace Tools.Reactive
                     base[index] = value;
                     InvokeElementEvents(value, CollectionEvent.Add);
                     InvokeListEvents();
+                    lastSetedHash = this.GetHashCode();
                 }
             }
         }
@@ -96,6 +97,11 @@ namespace Tools.Reactive
         public void UnsubscribeAll() => eventStream.DisonnectAll();
         public IDisposable Subscribe(Action<List<T>> onChangedEvent) => eventStream.Subscribe(onChangedEvent); //SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
+
+        public bool HasChanges()
+        {
+            return lastSetedHash != this.GetHashCode();
+        }
     }
     public interface IReactiveCollection<T> : ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
     {

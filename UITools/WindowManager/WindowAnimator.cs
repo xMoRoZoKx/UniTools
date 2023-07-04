@@ -48,7 +48,7 @@ namespace Tools
                 canvasGroup.DOFade(isShowing ? 1 : 0, duration);
             }
             await TaskTools.WaitForSeconds(duration);
-            canvasGroup.interactable = true;
+            if (canvasGroup != null) canvasGroup.interactable = true;
             onCompleted?.Invoke();
         }
     }
@@ -90,7 +90,7 @@ namespace Tools
     [System.Serializable]
     public class AnimatedObject
     {
-        public AnimatedObject(){}
+        public AnimatedObject() { }
         public AnimatedObject(Transform transform, AnimationSettings settings)
         {
             this.transform = transform;

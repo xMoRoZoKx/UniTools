@@ -92,7 +92,7 @@ namespace Tools
             // win.onClose.RemoveAllListeners();
             win.connections.DisconnectAll();
             win.active = false;
-            TaskTools.Wait(win.CloseAnimation(), () =>
+            this.Wait(win.CloseAnimation(), () =>
             {
                 freeWindows.Add(win);
                 shownWindows.Remove(win);

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public static class GameTools
+public static class UnityTools
 {
     public static void SetActive(this Component component, bool value)
     {
@@ -51,6 +51,7 @@ public static class GameTools
     }
     public static Vector3 ScreenToWorldPointPerspective(this Camera camera, Vector2 screenPos, float distance)
     {
+        if(camera == null) return Vector3.zero;
         Plane plane = new Plane(Vector3.back, Vector3.zero);
         Ray ray = camera.ScreenPointToRay(new Vector3(screenPos.x, screenPos.y));
         if (plane.Raycast(ray, out float enter))

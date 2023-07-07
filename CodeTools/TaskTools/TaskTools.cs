@@ -27,6 +27,7 @@ namespace Tools
         public static async void Wait(float time, Action waitEvent, bool playInEditorMode = false)
         {
             await WaitForSeconds(time, playInEditorMode);
+            if(!Application.isPlaying) return;
             waitEvent.Invoke();
         }
         // public static Task Wait(AsyncOperation operation)

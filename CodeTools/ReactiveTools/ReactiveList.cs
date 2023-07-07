@@ -57,7 +57,7 @@ namespace Tools.Reactive
         public new void Insert(int index, T item)
         {
             base.Insert(index, item);
-            InvokeElementEvents(base[index], CollectionEvent.Replace);
+            InvokeElementEvents(base[index], CollectionEvent.Add);
             InvokeListEvents();
         }
 

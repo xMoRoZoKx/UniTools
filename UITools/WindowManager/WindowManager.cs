@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tools;
@@ -22,7 +23,7 @@ namespace Tools
                         Debug.LogError("Window manager not found");
                         return null;
                     }
-                    _instance = Object.Instantiate(managers[0]);
+                    _instance = UnityEngine.Object.Instantiate(managers[0]);
                 }
                 return _instance;
             }
@@ -46,7 +47,7 @@ namespace Tools
             instance.canvas = instance.GetComponent<Canvas>();
             instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
         }
-        public T Show<T>() where T : WindowBase
+        public T Show<T>(Action<T> onShown) where T : WindowBase
         {
             var freeWindows = this.freeWindows.FindAll(w => w is T);
             var shownWindows = this.shownWindows.FindAll(w => w is T);
@@ -58,30 +59,32 @@ namespace Tools
             };
             if (freeWindows.Count > 0 && windowPrefab.isReusableView)
             {
-                return ShowExistView((T)freeWindows.Find(w => typeof(T) == w.GetType()));
+                return ShowExistView((T)freeWindows.Find(w => typeof(T) == w.GetType()), onShown);
             }
-            return CreateView((T)windowPrefab);
+            return CreateView((T)windowPrefab, onShown);
         }
-        private T ShowExistView<T>(T window) where T : WindowBase
+        private T ShowExistView<T>(T window, Action<T> onShown) where T : WindowBase
         {
-            Show(window);
+            Show(window, onShown);
             freeWindows.Remove(window);
             return (T)window;
         }
-        private T CreateView<T>(T windowPrefab) where T : WindowBase
+        private T CreateView<T>(T windowPrefab, Action<T> onShown) where T : WindowBase
         {
             var window = Instantiate(windowPrefab, root);
-            Show(window);
+            Show(window, onShown);
             return (T)window;
         }
-        private void Show<T>(T window) where T : WindowBase
+        private void Show<T>(T window, Action<T> onShown) where T : WindowBase
         {
             window.gameObject.SetActive(true);
-            window.transform.SetSiblingIndex(window.isPriorityWindow  ? root.childCount - 1 : shownWindows.FindAll(w => !w.isPriorityWindow ).Count);//root.childCount - 1);
+            window.transform.SetSiblingIndex(window.isPriorityWindow ? root.childCount - 1 : shownWindows.FindAll(w => !w.isPriorityWindow).Count);//root.childCount - 1);
             window.OnOpened();
             window.ShowAnimation();
             shownWindows.Add(window);
             window.active = true;
+            onShown?.Invoke(window);
+
         }
         public void Close(WindowBase closeWindow)
         {

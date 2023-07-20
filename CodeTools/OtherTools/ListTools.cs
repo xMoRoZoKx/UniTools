@@ -17,7 +17,7 @@ namespace Tools
             }
             return reactiveList;
         }
-        public static T GetRandom<T>(this List<T> list)
+        public static T GetRandom<T>(this IReadOnlyList<T> list)
         {
             if (list.Count == 0) return default;
             return list[UnityEngine.Random.Range(0, list.Count())];
@@ -28,7 +28,7 @@ namespace Tools
             for (int i = 0; i < arr.Length; i++)
                 action(arr[i]);
         }
-        public static List<T> GetRandoms<T>(this List<T> list, int count)
+        public static List<T> GetRandoms<T>(this IReadOnlyList<T> list, int count)
         {
             if (list.Count == 0) return default;
             if (count > list.Count) count = list.Count;
@@ -47,7 +47,7 @@ namespace Tools
             }
             return default;
         }
-        public static T Last<T>(this List<T> list) => list[list.Count - 1];
+        public static T Last<T>(this IReadOnlyList<T> list) => list[list.Count - 1];
         public static List<T> Shuffle<T>(this List<T> list)
         {
             if (list.Count == 0) return default;

@@ -47,7 +47,7 @@ namespace Tools
             instance.canvas = instance.GetComponent<Canvas>();
             instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
         }
-        public T Show<T>(Action<T> onShown) where T : WindowBase
+        public T Show<T>(Action<T> onShown = null) where T : WindowBase
         {
             var freeWindows = this.freeWindows.FindAll(w => w is T);
             var shownWindows = this.shownWindows.FindAll(w => w is T);

@@ -11,7 +11,11 @@ public class EventStream<T> : IDisposable
     }
     public void Invoke(T value)
     {
-        actions.ForEach(a => a.Invoke(value));
+        var count = actions.Count;
+        for (int i = 0; i < count; i++)
+        {
+            actions[i]?.Invoke(value);
+        }
     }
     public void DisonnectAll() => actions.Clear();
 
@@ -48,7 +52,11 @@ public class EventStream : IDisposable
     }
     public void Invoke()
     {
-        actions.ForEach(a => a.Invoke());
+        var count = actions.Count;
+        for (int i = 0; i < count; i++)
+        {
+            actions[i]?.Invoke();
+        }
     }
     public void DisonnectAll() => actions.Clear();
 

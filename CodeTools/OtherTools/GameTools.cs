@@ -25,6 +25,10 @@ public static class UnityTools
     {
         transform.position += new Vector3(x, y, z);
     }
+    public static void MoveTo(this Transform transform, Vector3 targetPosition, float step)
+    {
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, step);
+    }
     public static void Teleportation(this Transform transform, Vector3 position)
     {
         transform.position += position - transform.position;
@@ -51,7 +55,7 @@ public static class UnityTools
     }
     public static Vector3 ScreenToWorldPointPerspective(this Camera camera, Vector2 screenPos, float distance)
     {
-        if(camera == null) return Vector3.zero;
+        if (camera == null) return Vector3.zero;
         Plane plane = new Plane(Vector3.back, Vector3.zero);
         Ray ray = camera.ScreenPointToRay(new Vector3(screenPos.x, screenPos.y));
         if (plane.Raycast(ray, out float enter))

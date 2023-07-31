@@ -70,11 +70,11 @@ namespace Tools
 
             }
         }
-        public static IEnumerator LoadText(string url, Action<string> getTextEvent)
+        public static IEnumerator LoadText(string url, Action<string> getTextEvent, Action<UnityWebRequest> onCreateRequest = null)
         {
             using (UnityWebRequest request = UnityWebRequest.Get(url))
             {
-                //need set headers
+                onCreateRequest?.Invoke(request);
                 yield return request.SendWebRequest();
                 if (request.HasError())
                 {

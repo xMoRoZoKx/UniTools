@@ -22,7 +22,7 @@ namespace Tools.PlayerPrefs
         {
             return Application.persistentDataPath + "/" + layerName;
         }
-        public static string GetKey(string key) => key.Trim('/');
+        public static string GetKey(string key) =>  key.Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f');
         public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set<T>(key, layerName, obj, true, true);
         private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
         {

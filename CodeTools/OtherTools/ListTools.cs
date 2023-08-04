@@ -17,6 +17,18 @@ namespace Tools
             }
             return reactiveList;
         }
+        public static T GetRandom<T>(this IReadOnlyList<T> list, Predicate<T> match)
+        {
+            if (list.Count == 0) return default;
+
+            List<T> newList = new();
+            foreach (var item in list)
+            {
+                if (match.Invoke(item)) newList.Add(item);
+            }
+            var idx = UnityEngine.Random.Range(0, newList.Count());
+            return newList.HasIndex(idx) ? newList[idx] : default;
+        }
         public static T GetRandom<T>(this IReadOnlyList<T> list)
         {
             if (list.Count == 0) return default;

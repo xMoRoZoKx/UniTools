@@ -22,7 +22,7 @@ namespace Tools.PlayerPrefs
         {
             return Application.persistentDataPath + "/" + layerName;
         }
-        public static string GetKey(string key) =>  key.Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f');
+        public static string GetKey(string key) => key.Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f');
         public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set<T>(key, layerName, obj, true, true);
         private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
         {
@@ -118,7 +118,7 @@ namespace Tools.PlayerPrefs
             Set<List<string>>(layerName + ALL_KEYS, layerName, keys, false, false);
         }
 #if UNITY_EDITOR
-        [MenuItem("PlayerPrefsPro/Clear")]
+        [MenuItem("PlayerPrefsPro/Clear Default Layer")]
 #endif
         public static void DeleteDefaulSaves()
         {
@@ -131,7 +131,7 @@ namespace Tools.PlayerPrefs
             Set<List<string>>(layerName + ALL_KEYS, layerName, new List<string>(), false, false);
         }
 #if UNITY_EDITOR
-        [MenuItem("PlayerPrefsPro/Delete All Layers")]
+        [MenuItem("PlayerPrefsPro/Clear All Layers")]
 #endif
         public static void DeleteAllLayers()
         {

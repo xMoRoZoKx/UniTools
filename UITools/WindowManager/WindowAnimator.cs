@@ -41,14 +41,14 @@ namespace Tools
                 if (isShowing) ao.StartShowAnimation(duration, defaultSettings);
                 else ao.StartHideAnimation(duration, defaultSettings);
             });
-            canvasGroup.interactable = false;
+            //canvasGroup.interactable = false;
             if (useFade)
             {
                 canvasGroup.alpha = isShowing ? 0 : 1;
                 canvasGroup.DOFade(isShowing ? 1 : 0, duration);
             }
             await TaskTools.WaitForSeconds(duration);
-            if (canvasGroup != null) canvasGroup.interactable = true;
+            //if (canvasGroup != null) canvasGroup.interactable = true;
             onCompleted?.Invoke();
         }
     }

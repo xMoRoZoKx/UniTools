@@ -28,7 +28,7 @@ namespace Tools
                 return _instance;
             }
         }
-        [SerializeField] private Transform root;
+        [SerializeField] private Transform root, nonClickBG;
         [SerializeField] private bool useDontDestroyOnLoad = true;
         public Canvas canvas { get; private set; }
         private List<WindowBase> prefabs;
@@ -37,6 +37,7 @@ namespace Tools
         private void Awake()
         {
             SetNewInstance(this);
+            nonClickBG.SetActive(false);
             // if (FindObjectOfType<EventSystem>()) GetComponent<EventSystem>().enabled = false;
             if (useDontDestroyOnLoad) DontDestroyOnLoad(this);
         }
@@ -80,7 +81,8 @@ namespace Tools
             window.gameObject.SetActive(true);
             window.transform.SetSiblingIndex(window.isPriorityWindow ? root.childCount - 1 : shownWindows.FindAll(w => !w.isPriorityWindow).Count);//root.childCount - 1);
             window.OnOpened();
-            window.ShowAnimation();
+            nonClickBG.SetActive(true);
+            this.Wait(window.ShowAnimation(), () => nonClickBG.SetActive(false));
             shownWindows.Add(window);
             window.active = true;
             onShown?.Invoke(window);
@@ -95,8 +97,10 @@ namespace Tools
             // win.onClose.RemoveAllListeners();
             win.connections.DisconnectAll();
             win.active = false;
+            nonClickBG.SetActive(true);
             this.Wait(win.CloseAnimation(), () =>
             {
+                nonClickBG.SetActive(false);
                 freeWindows.Add(win);
                 shownWindows.Remove(win);
                 if (win.isReusableView) win.gameObject.SetActive(false);

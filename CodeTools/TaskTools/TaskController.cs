@@ -17,7 +17,7 @@ namespace Tools
             await WaitForMilliseconds((int)(seconds * 1000), playInEditorMode);
         }
 
-        public async Task WaitForMilliseconds(int milliseconds, bool playInEditorMode = false, int accuracy = 1)
+        public async Task WaitForMilliseconds(int milliseconds, bool playInEditorMode = false, int accuracy = 10)
         {
             if (!Application.isPlaying && !playInEditorMode || IsStopped)
             {
@@ -32,11 +32,11 @@ namespace Tools
 
             long timer = milliseconds;
 
-            while (!IsStopped && timer > 0)
+            while ((!Application.isPlaying && !playInEditorMode) && !IsStopped && timer > 0)
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                while (!IsPaused && !IsStopped && timer > 0)
+                while ((!Application.isPlaying && !playInEditorMode) && !IsPaused && !IsStopped && timer > 0)
                 {
                     await Task.Delay(accuracy);
                     timer -= sw.ElapsedMilliseconds;

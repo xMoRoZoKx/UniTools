@@ -3,9 +3,9 @@ namespace Tools
     public class AnimatedWindowBase : WindowBase
     {
         public WindowAnimator animator;
-        protected override void Awake()
+        public override void OnOpened()
         {
-            base.Awake();
+            base.OnOpened();
             animator.Init(transform);
         }
 

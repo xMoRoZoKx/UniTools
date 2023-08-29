@@ -86,7 +86,10 @@ namespace Tools
             shownWindows.Add(window);
             window.active = true;
             onShown?.Invoke(window);
-
+        }
+        public void Close<T>() where T : WindowBase
+        {
+            Close(GetOpenedWindow<T>());
         }
         public void Close(WindowBase closeWindow)
         {
@@ -94,7 +97,7 @@ namespace Tools
             var win = shownWindows.FindLast(w => w == closeWindow);
             if (!win) return;
             win.onClose.Invoke();
-            // win.onClose.RemoveAllListeners();
+            win.OnClosed();
             win.connections.DisconnectAll();
             win.active = false;
             nonClickBG.SetActive(true);

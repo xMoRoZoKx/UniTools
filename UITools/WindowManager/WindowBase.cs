@@ -30,5 +30,6 @@ namespace Tools
             return 0;
         }
         public virtual void OnOpened() { }
+        public virtual void OnClosed() { }
     }
 }

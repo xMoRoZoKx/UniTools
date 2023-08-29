@@ -32,11 +32,11 @@ namespace Tools
 
             long timer = milliseconds;
 
-            while ((!Application.isPlaying && !playInEditorMode) && !IsStopped && timer > 0)
+            while (!IsStopped && timer > 0)
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                while ((!Application.isPlaying && !playInEditorMode) && !IsPaused && !IsStopped && timer > 0)
+                while (!IsPaused && !IsStopped && timer > 0)
                 {
                     await Task.Delay(accuracy);
                     timer -= sw.ElapsedMilliseconds;

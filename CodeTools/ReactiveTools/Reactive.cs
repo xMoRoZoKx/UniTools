@@ -20,7 +20,7 @@ namespace Tools.Reactive
         protected T _value;
         protected int lastSetedHash;
         EventStream<(T, T)> eventStream = new EventStream<(T, T)>();
-        public T value
+        public virtual T value
         {
             get
             {
@@ -28,8 +28,7 @@ namespace Tools.Reactive
             }
             set
             {
-
-                if ((value != null && _value == null) || value?.GetHashCode() != _value?.GetHashCode())
+                if ((value != null && _value == null) || (value != null && !value.Equals(_value)))//.GetHashCode() != _value?.GetHashCode())
                 {
                     var oldVal = _value;
                     _value = value;

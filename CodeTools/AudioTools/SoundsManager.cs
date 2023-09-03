@@ -61,7 +61,7 @@ public static class SoundsManager
         sourceAndType.source.Play();
         return sourceAndType.source;
     }
-    public static void SetGlobalMaxVolume(AudioType type, float vol)
+    public static void SetGlobalVolume(AudioType type, float vol)
     {
         if (vol == 0) vol = 0.0001f;
         sourcesAndTypes.FindAll(st => st.type == type).ForEach(st => st.source.volume = st.source.volume / (type == AudioType.Music ? musicVolume : sfxVolume) * vol);
@@ -69,12 +69,12 @@ public static class SoundsManager
         else if (type == AudioType.SFX) sfxVolume = vol;
     }
     public static AudioClip LoadAudio(string clipPatch) => Resources.Load<AudioClip>(clipPatch.ToString());
-    public static void OnClickWithSound(this Button btn, Action reaction, string clipPatch = Sounds.SimpleClick)
+    public static void OnClickWithSound(this Button btn, Action reaction, string clipPatch = Sounds.SimpleClick, bool clearCollbacks = true)
     {
         btn.OnClick(() =>
         {
             PlayAudio(clipPatch);
             reaction?.Invoke();
-        });
+        }, clearCollbacks);
     }
 }

@@ -130,7 +130,7 @@ namespace Tools
                 if (settings.scaleForce.punchScaleForce == 0) transform.DOScale(startState.Scale, duration);
                 else
                 {
-                    float punchForce = settings.scaleForce.punchScaleForce;
+                    float punchForce = 1 + settings.scaleForce.punchScaleForce;
                     const float boomTime = 0.1f;
                     transform.DOScale(startState.Scale * punchForce, duration - boomTime).OnComplete(() => transform.DOScale(startState.Scale / punchForce, boomTime));
                 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 namespace Tools
 {
-    public class Singleton<T> : ISingleton<T> where T : Singleton<T>, new()
+    public class Singleton<T> : ISingleton<T> where T : Singleton<T>, new() 
     {
         public static T Instance => ISingleton<T>.Instance;
     }

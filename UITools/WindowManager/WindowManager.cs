@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Tools;
 using UnityEngine;
-// using UnityEngine.EventSystems;
 
 namespace Tools
 {
@@ -23,7 +22,7 @@ namespace Tools
                         Debug.LogError("Window manager not found");
                         return null;
                     }
-                    _instance = UnityEngine.Object.Instantiate(managers[0]);
+                    _instance = Instantiate(managers[0]);
                 }
                 return _instance;
             }
@@ -44,36 +43,51 @@ namespace Tools
         private void SetNewInstance(WindowManager instance)
         {
             if (_instance != null && _instance != instance) Destroy(_instance.gameObject);
+
             _instance = instance;
             instance.canvas = instance.GetComponent<Canvas>();
             instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
         }
         public T Show<T>(Action<T> onShown = null) where T : WindowBase
         {
+            return Show(prefabName: null, onShown);
+        }
+        public T Show<T>(string prefabName, Action<T> onShown = null) where T : WindowBase
+        {
             var freeWindows = this.freeWindows.FindAll(w => w is T);
             var shownWindows = this.shownWindows.FindAll(w => w is T);
-            var windowPrefab = prefabs.Find(w => w is T);
+            var windowPrefab = prefabs.Find(w => (String.IsNullOrEmpty(prefabName) || prefabName == w.gameObject.name) && w is T);
+
             if (!windowPrefab)
             {
-                Debug.LogError("Window " + typeof(T).ToString() + " not found");
+                if (String.IsNullOrEmpty(prefabName))
+                    Debug.LogError($"Window {typeof(T)} not found");
+                else
+                    Debug.LogError($"Window by type: {typeof(T)}, with name: {prefabName} not found");
+
                 return null;
             };
             if (freeWindows.Count > 0 && windowPrefab.isReusableView)
             {
                 return ShowExistView((T)freeWindows.Find(w => typeof(T) == w.GetType()), onShown);
             }
+
             return CreateView((T)windowPrefab, onShown);
         }
         private T ShowExistView<T>(T window, Action<T> onShown) where T : WindowBase
         {
             Show(window, onShown);
+
             freeWindows.Remove(window);
+
             return (T)window;
         }
         private T CreateView<T>(T windowPrefab, Action<T> onShown) where T : WindowBase
         {
             var window = Instantiate(windowPrefab, root);
+
             Show(window, onShown);
+
             return (T)window;
         }
         private void Show<T>(T window, Action<T> onShown) where T : WindowBase
@@ -81,10 +95,14 @@ namespace Tools
             window.gameObject.SetActive(true);
             window.transform.SetSiblingIndex(window.isPriorityWindow ? root.childCount - 1 : shownWindows.FindAll(w => !w.isPriorityWindow).Count);//root.childCount - 1);
             window.OnOpened();
-            nonClickBG.SetActive(true);
-            this.Wait(window.ShowAnimation(), () => nonClickBG.SetActive(false));
-            shownWindows.Add(window);
             window.active = true;
+
+            nonClickBG.SetActive(true);
+
+            this.Wait(window.ShowAnimation(), () => nonClickBG.SetActive(false));
+
+            shownWindows.Add(window);
+
             onShown?.Invoke(window);
         }
         public void Close<T>() where T : WindowBase
@@ -94,18 +112,23 @@ namespace Tools
         public void Close(WindowBase closeWindow)
         {
             Debug.Log("close " + closeWindow?.name);
+
             var win = shownWindows.FindLast(w => w == closeWindow);
             if (!win) return;
+
             win.onClose.Invoke();
             win.OnClosed();
             win.connections.DisconnectAll();
             win.active = false;
+
             nonClickBG.SetActive(true);
+
             this.Wait(win.CloseAnimation(), () =>
             {
                 nonClickBG.SetActive(false);
                 freeWindows.Add(win);
                 shownWindows.Remove(win);
+
                 if (win.isReusableView) win.gameObject.SetActive(false);
                 else
                 {

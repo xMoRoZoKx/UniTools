@@ -24,6 +24,7 @@ public static class SoundsManager
         public AudioType type;
     }
     private static List<SourceAndType> sourcesAndTypes = new List<SourceAndType>();
+    private static int sourcesLinit = 100;
     public static float musicVolume
     {
         get => GetVolume(nameof(musicVolume));
@@ -40,12 +41,19 @@ public static class SoundsManager
         var val = PlayerPrefsPro.GetFloat(key);
         return val == 0 ? 0.01f : val;
     }
+    public static void SetSourcesLimit(int value)
+        => sourcesLinit = value;
     public static AudioSource PlayAudio(string clicpPatch, float volume = 1, bool loop = false, AudioType type = AudioType.SFX)
         => PlayAudio(LoadAudio(clicpPatch), volume, loop, type);
     public static AudioSource PlayAudio(AudioClip clip, float volume = 1, bool loop = false, AudioType type = AudioType.SFX)
     {
         sourcesAndTypes.RemoveAll(s => s.source == null);
         var sourceAndType = sourcesAndTypes.Find(s => !s.source.isPlaying);
+        if (sourceAndType == null && sourcesAndTypes.Count >= sourcesLinit)
+        {
+            Debug.Log("Wrong limit");
+            sourceAndType = sourcesAndTypes[0];
+        }
         if (sourceAndType == null)
         {
             sourceAndType = new SourceAndType() { source = new GameObject("SoundObject").AddComponent<AudioSource>(), type = type };

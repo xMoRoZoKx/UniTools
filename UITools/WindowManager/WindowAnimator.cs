@@ -9,7 +9,7 @@ namespace Tools
     [System.Serializable]
     public class WindowAnimator
     {
-        public float duration = 0.5f;
+        public float duration = 0.2f;
         [SerializeField] private bool useFade = true;
         [SerializeField] private List<AnimatedObject> animateObjects;
         [SerializeField] private AnimationSettings defaultSettings;
@@ -73,10 +73,10 @@ namespace Tools
     [System.Serializable]
     public class ScaleVector
     {
-        [Range(0, 1000)] public float x;
-        [Range(0, 1000)] public float y;
-        [Range(0, 1000)] public float z;
-        [Range(0, 10)] public float punchScaleForce = 1;
+        [Range(0, 10)] public float x = 1.4f;
+        [Range(0, 10)] public float y = 1.4f;
+        [Range(0, 10)] public float z = 1.4f;
+        [Range(0, 10)] public float punchScaleForce = .1f;
         public Vector3 GetVector() => new Vector3(x, y, z);
         public bool isZeroVector => x == default && y == default && z == default;
         public static Vector3 operator /(Vector3 uniVector, ScaleVector scaleVector)
@@ -132,7 +132,7 @@ namespace Tools
                 {
                     float punchForce = 1 + settings.scaleForce.punchScaleForce;
                     const float boomTime = 0.1f;
-                    transform.DOScale(startState.Scale * punchForce, duration - boomTime).OnComplete(() => transform.DOScale(startState.Scale / punchForce, boomTime));
+                    transform.DOScale(startState.Scale * punchForce, duration - boomTime).OnComplete(() => transform.DOScale(startState.Scale, boomTime));
                 }
             }
 

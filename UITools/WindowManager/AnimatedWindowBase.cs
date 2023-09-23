@@ -13,7 +13,7 @@ namespace Tools
         {
             animator.StartShowAnimation(() =>
             {
-                gameObject.SetActive(true);
+                gameObject?.SetActive(true);
             });
             return animator.duration;
         }

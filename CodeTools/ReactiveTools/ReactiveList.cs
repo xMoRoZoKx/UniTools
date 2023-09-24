@@ -46,6 +46,14 @@ namespace Tools.Reactive
             InvokeElementEvents(item, CollectionEvent.Add);
             InvokeListEvents();
         }
+        
+        public new void AddRange(IEnumerable<T> collection)
+        {
+            foreach(var element in collection)
+            {
+                Add(element);
+            }
+        }
         public new void Clear()
         {
             for (int i = Count - 1; i >= 0; i--)

@@ -4,10 +4,9 @@ using UnityEngine.UI;
 
 namespace Tools
 {
-    public class WindowBase : MonoBehaviour
+    public class WindowBase : ConnectableMonoBehaviour
     {
         [field: SerializeField, Header("Optional")] public Button closeButton { get; private set; }
-        public Connections connections = new Connections();
         [field: SerializeField, Space] public bool isReusableView { get; private set; } = true;
         [field: SerializeField] public bool needHideThenWindowIsNotTop { get; private set; } = false;
         [field: SerializeField] public bool isPriorityWindow { get; private set; } = false;

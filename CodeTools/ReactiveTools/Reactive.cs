@@ -18,7 +18,7 @@ namespace Tools.Reactive
         {
             _value = value;
         }
-        protected T _value;
+        [SerializeField] protected T _value;
         protected int lastSetedHash;
         EventStream<(T, T)> eventStream = new EventStream<(T, T)>();
         public virtual T value

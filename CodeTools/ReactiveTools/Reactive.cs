@@ -132,7 +132,7 @@ namespace Tools.Reactive
         public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {
             if (reactive == null) return reactive;
-            reactive.SetValue(PlayerPrefsPro.Get<T>(saveKey, layer));
+            reactive.SetValue(PlayerPrefsPro.HasKey(saveKey, layer) ? PlayerPrefsPro.Get<T>(saveKey, layer) : reactive.GetValue());
             return reactive;
         }
         //JSON UTILS

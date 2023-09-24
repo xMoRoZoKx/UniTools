@@ -12,9 +12,9 @@ namespace Tools.Reactive
         }
         public AutoSaver(string key, T defaultValue, string layer = PlayerPrefsPro.BASE_LAYER)
         {
-            if (!PlayerPrefsPro.HasKey(key, layer)) _value = defaultValue; 
             this.key = key;
             this.ConnectToSaver(key, layer);
+            if (!PlayerPrefsPro.HasKey(key, layer)) value = defaultValue; 
         }
         public void Save(string layer = PlayerPrefsPro.BASE_LAYER) => this.Save(key, layer);
     }

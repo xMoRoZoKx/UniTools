@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tools.PlayerPrefs;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Tools.Reactive
@@ -80,6 +81,34 @@ namespace Tools.Reactive
     }
     public static class ReactiveUtils
     {
+        //CONNECTED
+        public static IDisposable SubscribeAndInvoke<T1, T2, T3>(this IReactive<T1> reactive1, IReactive<T2> reactive2, IReactive<T3> reactive3, Action<T1, T2, T3> onChangedEvent)
+        {
+            var connections = new Connections();
+            connections += reactive1.SubscribeAndInvoke(val => Invoke());
+            connections += reactive2.SubscribeAndInvoke(val => Invoke());
+            connections += reactive3.SubscribeAndInvoke(val => Invoke());
+
+            void Invoke()
+            {
+                onChangedEvent?.Invoke(reactive1.GetValue(), reactive2.GetValue(), reactive3.GetValue());
+            }
+
+            return connections;
+        }
+        public static IDisposable SubscribeAndInvoke<T1, T2>(this IReactive<T1> reactive1, IReactive<T2> reactive2, Action<T1, T2> onChangedEvent)
+        {
+            var connections = new Connections();
+            connections += reactive1.SubscribeAndInvoke(val => Invoke());
+            connections += reactive2.SubscribeAndInvoke(val => Invoke());
+
+            void Invoke()
+            {
+                onChangedEvent?.Invoke(reactive1.GetValue(), reactive2.GetValue());
+            }
+
+            return connections;
+        }
         //SAVES UTILS
         // private static async void SaveEachSeconds<T>(this IReactive<T> reactive, string key, float timeOut = 1)// IN TESTING
         // {

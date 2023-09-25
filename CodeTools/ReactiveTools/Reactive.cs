@@ -30,7 +30,7 @@ namespace Tools.Reactive
             }
             set
             {
-                if ((value != null && _value == null) || (value != null && !value.Equals(_value)))//.GetHashCode() != _value?.GetHashCode())
+                if ((value != null && _value == null) || (value == null && _value != null) || (value != null && !value.Equals(_value)))//.GetHashCode() != _value?.GetHashCode())
                 {
                     var oldVal = _value;
                     _value = value;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+[System.Serializable]
 public class EventStream<T> : IDisposable
 {
     List<Action<T>> actions = new List<Action<T>>();
@@ -42,6 +43,7 @@ public class EventStream<T> : IDisposable
         }
     }
 }
+[System.Serializable]
 public class EventStream : IDisposable
 {
     List<Action> actions = new List<Action>();

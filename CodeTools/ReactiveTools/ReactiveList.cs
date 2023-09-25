@@ -12,10 +12,14 @@ namespace Tools.Reactive
         Add,
         Replace
     }
-    public class ReactiveList<T> : List<T>, IReactiveCollection<T>, IReactive<List<T>>
+
+    [System.Serializable]
+    public class ReactiveList<T> : List<T>, IReactiveCollection<T>
     {
-        private EventStream<(T, CollectionEvent)> _eventsForEach = new EventStream<(T, CollectionEvent)>();
-        EventStream<List<T>> eventStream = new EventStream<List<T>>();
+        [NonSerialized] EventStream<(T, CollectionEvent)> _eventsForEach;
+        EventStream<(T, CollectionEvent)> eventsForEach => _eventsForEach ??= new EventStream<(T, CollectionEvent)>();
+        [NonSerialized] EventStream<List<T>> _eventStream;
+        EventStream<List<T>> eventStream => _eventStream ??= new EventStream<List<T>>();
         public int lastSetedHash = 0;
         public new T this[int index]
         {
@@ -38,7 +42,7 @@ namespace Tools.Reactive
         }
         private void InvokeElementEvents(T value, CollectionEvent type)
         {
-            _eventsForEach.Invoke((value, type));
+            eventsForEach.Invoke((value, type));
         }
         public new void Add(T item)
         {
@@ -46,10 +50,10 @@ namespace Tools.Reactive
             InvokeElementEvents(item, CollectionEvent.Add);
             InvokeListEvents();
         }
-        
+
         public new void AddRange(IEnumerable<T> collection)
         {
-            foreach(var element in collection)
+            foreach (var element in collection)
             {
                 Add(element);
             }
@@ -88,7 +92,7 @@ namespace Tools.Reactive
         }
 
 
-        public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement) => _eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
+        public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement) => eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
         public List<T> GetValue() => this;
 
         public void SetValue(List<T> value)
@@ -111,7 +115,7 @@ namespace Tools.Reactive
             return lastSetedHash != this.GetHashCode();
         }
     }
-    public interface IReactiveCollection<T> : ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>
+    public interface IReactiveCollection<T> : ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>
     {
         public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement);
     }

@@ -20,7 +20,8 @@ namespace Tools.Reactive
         }
         [SerializeField] protected T _value;
         protected int lastSetedHash;
-        EventStream<(T, T)> eventStream = new EventStream<(T, T)>();
+        [NonSerialized] EventStream<(T, T)> _eventStream;
+        EventStream<(T, T)> eventStream => _eventStream ??= new EventStream<(T, T)>();
         public virtual T value
         {
             get

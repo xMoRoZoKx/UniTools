@@ -2,6 +2,7 @@ using Tools.PlayerPrefs;
 
 namespace Tools.Reactive
 {
+    [System.Serializable]
     public class AutoSaverList<T> : ReactiveList<T>
     {
         public string key { get; private set; }

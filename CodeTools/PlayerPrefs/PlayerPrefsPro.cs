@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditor;
 using UnityEngine;
 namespace Tools.PlayerPrefs
 {
     public static class PlayerPrefsPro
     {
+        [System.Serializable]
         private class Json<T>
         {
             public Json(T value)
@@ -19,14 +21,14 @@ namespace Tools.PlayerPrefs
         public const string BASE_LAYER = "BASE", ALL_KEYS = "_ALL_KEYS", ALL_LAYERS = "_ALL_LAYERS", CONSTANT_LAYER = "CONST_LAYER";
         public static string Patch(string key, string layerName = BASE_LAYER)
         {
-            return Application.persistentDataPath + "/" + layerName + key.Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f') + "2";;
+            return Application.persistentDataPath + "/" + layerName + key.Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f') + "6"; ;
         }
-        // public static string GetKey(string key) => key == null ? "Trash" : 
         #region Seters
         public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set<T>(key, layerName, obj, true, true);
         private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
         {
-            SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key, needAddToKeysList, needAddToLayersList, layerName);
+            // SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key, needAddToKeysList, needAddToLayersList, layerName);
+            SetBytes(ByteSerializer.ToByteArray(obj), key, needAddToKeysList, needAddToLayersList, layerName);
         }
         public static void SetBytes(this byte[] bytes, string key, string layerName = BASE_LAYER) => SetBytes(bytes, key, true, true, layerName);
         private static void SetBytes(this byte[] bytes, string key, bool needAddToKeysList, bool needAddToLayersList, string layerName = BASE_LAYER)
@@ -45,11 +47,13 @@ namespace Tools.PlayerPrefs
         #region Geters
         public static T Get<T>(string key, string layerName = BASE_LAYER)
         {
-            var bytes = GetBytes(key, layerName);
+            // var bytes = GetBytes(key, layerName);
 
-            string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
-            if (String.IsNullOrEmpty(json)) return default;
-            return JsonUtility.FromJson<Json<T>>(json).value;
+            // string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
+            // if (String.IsNullOrEmpty(json)) return default;
+            // return JsonUtility.FromJson<Json<T>>(json).value;
+
+            return ByteSerializer.ByteArrayTo<T>(GetBytes(key, layerName));
         }
         public static byte[] GetBytes(string key, string layerName = BASE_LAYER)
         {

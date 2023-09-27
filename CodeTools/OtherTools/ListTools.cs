@@ -87,7 +87,7 @@ namespace Tools
             }
             else
             {
-                for (int i = 0; i < startCount + size; i++)
+                for (int i = 0; i < size - startCount; i++)
                 {
                     list.Add(defaultValue);
                 }

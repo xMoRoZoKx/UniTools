@@ -19,7 +19,7 @@ namespace Tools
             {
                 if (views.Count <= i)
                     views.Add(UnityEngine.Object.Instantiate(prefab, container));
-                    
+
                 views[i].SetActive(true);
                 onShow?.Invoke(views[i]);
             }
@@ -42,11 +42,11 @@ namespace Tools
 
         public Connections connections = new Connections();
 
-        public Presenter<Data, View> Present(IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow, bool useIgnore = true)
+        public Presenter<Data, View> Present(IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow, bool useIgnoreElements = true)
         {
             _views = container.GetComponentsInChildren<View>().ToList();
 
-            if (!useIgnore) _views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
+            if (!useIgnoreElements) _views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
 
             _views.ForEach(v => v.SetActive(false));
 

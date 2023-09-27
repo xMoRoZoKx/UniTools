@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public static class UnityTools
@@ -20,6 +21,16 @@ public static class UnityTools
     {
         if (clearOther) button?.onClick.RemoveAllListeners();
         button?.onClick.AddListener(() => onClick?.Invoke());
+    }
+    public static void SetAction(this UnityEvent unityEvent, Action action, bool clearOther = true)
+    {
+        if (clearOther) unityEvent?.RemoveAllListeners();
+        unityEvent?.AddListener(() => action?.Invoke());
+    }
+    public static void SetAction<T>(this UnityEvent<T> unityEvent, Action<T> action, bool clearOther = true)
+    {
+        if (clearOther) unityEvent?.RemoveAllListeners();
+        unityEvent?.AddListener(t => action?.Invoke(t));
     }
     public static void Move(this Transform transform, float x, float y, float z)
     {

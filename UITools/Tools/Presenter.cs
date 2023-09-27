@@ -14,10 +14,12 @@ namespace Tools
             views = container.GetComponentsInChildren<View>().ToList();
             views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
             views.ForEach(v => v.SetActive(false));
+
             for (int i = 0; i <= count; i++)
             {
                 if (views.Count <= i)
                     views.Add(UnityEngine.Object.Instantiate(prefab, container));
+                    
                 views[i].SetActive(true);
                 onShow?.Invoke(views[i]);
             }
@@ -33,19 +35,31 @@ namespace Tools
     }
     public class Presenter<Data, View> : IDisposable where View : Component
     {
-        public List<View> views { private set; get; } = new List<View>();
+        private List<View> _views = new List<View>();
+        private List<(View, Data)> _data = new List<(View, Data)>();
+        public IReadOnlyList<View> views => _views;
+        public IReadOnlyList<(View, Data)> data => _data;
+
         public Connections connections = new Connections();
-        public Presenter<Data, View> Present(IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow)
+
+        public Presenter<Data, View> Present(IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow, bool useIgnore = true)
         {
-            views = container.GetComponentsInChildren<View>().ToList();
-            views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
-            views.ForEach(v => v.SetActive(false));
+            _views = container.GetComponentsInChildren<View>().ToList();
+
+            if (!useIgnore) _views.RemoveAll(v => v.GetComponent<PresenterIgnore>());
+
+            _views.ForEach(v => v.SetActive(false));
+
+            _data.Clear();
+
             for (int i = 0; i < list.Count; i++)
             {
-                if (views.Count <= i)
-                    views.Add(UnityEngine.Object.Instantiate(prefab, container));
-                views[i].SetActive(true);
-                onShow?.Invoke(views[i], list[i]);
+                if (_views.Count <= i)
+                    _views.Add(UnityEngine.Object.Instantiate(prefab, container));
+
+                _views[i].SetActive(true);
+                onShow?.Invoke(_views[i], list[i]);
+                _data.Add((_views[i], list[i]));
             }
             return this;
         }
@@ -54,8 +68,9 @@ namespace Tools
         public void Dispose()
         {
             connections.DisconnectAll();
-            views.ForEach(view => view.SetActive(false));
-            views.Clear();
+
+            _views.ForEach(view => view.SetActive(false));
+            _views.Clear();
         }
     }
 }

@@ -64,21 +64,20 @@ namespace Tools.Reactive
         {
             this.value = value;
         }
-
-        public bool HasChanges()
-        {
-            return lastSetedHash != _value.GetHashCode();
-        }
     }
-    public interface IReactive<T>
+    public interface IReactive<T> : IReadOnlyReactive<T>
     {
-        public T GetValue();
         public void SetValue(T value);
+    }
+    
+    public interface IReadOnlyReactive<T>
+    {
+        public T Value => GetValue();
+        public T GetValue();
         public IDisposable SubscribeAndInvoke(Action<T> onChangedEvent);
         public IDisposable Subscribe(Action<T> onChangedEvent);
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
         public void UnsubscribeAll();
-        public bool HasChanges();
     }
     public static class ReactiveUtils
     {
@@ -110,15 +109,6 @@ namespace Tools.Reactive
 
             return connections;
         }
-        //SAVES UTILS
-        // private static async void SaveEachSeconds<T>(this IReactive<T> reactive, string key, float timeOut = 1)// IN TESTING
-        // {
-        //     while (reactive != null)
-        //     {
-        //         if(reactive.HasChanges()) reactive.Save(key);
-        //         await TaskTools.WaitForSeconds(timeOut);
-        //     }
-        // }
         public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
         {
             reactive.GetSave(saveKey, layer);

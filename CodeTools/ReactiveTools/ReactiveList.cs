@@ -93,7 +93,7 @@ namespace Tools.Reactive
 
 
         public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement) => eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
-        public List<T> GetValue() => this;
+        public List<T> GetValue() => this.ToList();
 
         public void SetValue(List<T> value)
         {
@@ -109,13 +109,12 @@ namespace Tools.Reactive
         public void UnsubscribeAll() => eventStream.DisonnectAll();
         public IDisposable Subscribe(Action<List<T>> onChangedEvent) => eventStream.Subscribe(onChangedEvent); //SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
-
-        public bool HasChanges()
-        {
-            return lastSetedHash != this.GetHashCode();
-        }
     }
-    public interface IReactiveCollection<T> : ICollection<T>, IEnumerable<T>, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>
+    public interface IReactiveCollection<T> : IList<T>, IReadOnlyReactiveCollection<T>
+    {
+    }
+    
+    public interface IReadOnlyReactiveCollection<T> : IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>
     {
         public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement);
     }

@@ -22,6 +22,14 @@ public static class UnityTools
         if (clearOther) button?.onClick.RemoveAllListeners();
         button?.onClick.AddListener(() => onClick?.Invoke());
     }
+    public static IDisposable Subscribe(this Button button, Action onClick)
+    {
+        return button.onClick.Subscribe(onClick);
+    }
+    public static IDisposable Subscribe(this UnityEvent unityEvent, Action action)
+    {
+        return new DisposableAction(() => unityEvent.AddListener(() => action?.Invoke()));
+    }
     public static void SetAction(this UnityEvent unityEvent, Action action, bool clearOther = true)
     {
         if (clearOther) unityEvent?.RemoveAllListeners();

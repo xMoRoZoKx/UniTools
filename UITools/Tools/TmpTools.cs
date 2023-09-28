@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using System.Linq;
+using Tools.Reactive;
 
-public static class DropdownTools
+public static class TmpTools
 {
     public static void SetValue(this TMP_Dropdown dropdown, string val) => dropdown.value = dropdown.options.FindIndex(option => option.text == val);
     public static void SetOptionsFromEnum<T>(this TMP_Dropdown dropdown) where T : Enum => dropdown.SetOptionsFromEnum(typeof(T));
@@ -27,5 +28,9 @@ public static class DropdownTools
         }
         dropdown.ClearOptions();
         dropdown.AddOptions(options);
+    }
+    public static IDisposable SetTextReactive<T>(this TMP_Text tmpText, IReactive<T> reactive, Func<T, string> textFunc = null)
+    {
+        return reactive.SubscribeAndInvoke(val => tmpText.text = textFunc == null ? val.ToString() : textFunc.Invoke(val));
     }
 }

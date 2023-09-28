@@ -46,7 +46,7 @@ namespace Tools
             if (count > list.Count) count = list.Count;
             return list.ToList().Shuffle().GetRange(0, count);
         }
-        public static T Remove<T>(this List<T> list, Predicate<T> match)
+        public static T Remove<T>(this IList<T> list, Predicate<T> match)
         {
             for (int i = 0; i < list.Count; i++)
             {

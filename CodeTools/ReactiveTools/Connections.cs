@@ -13,7 +13,7 @@ public class Connections : IDisposable
     }
     public void DisconnectAll()
     {
-        connects.ForEach(c => c.Dispose());
+        connects.ForEach(c => c?.Dispose());
         connects.Clear();
     }
     public void Dispose()

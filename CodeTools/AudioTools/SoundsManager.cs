@@ -85,4 +85,12 @@ public static class SoundsManager
             reaction?.Invoke();
         }, clearCollbacks);
     }
+    public static IDisposable SubscribeWithSound(this Button btn, Action reaction, string clipPatch = Sounds.SimpleClick, bool clearCollbacks = true)
+    {
+        return btn.Subscribe(() =>
+        {
+            PlayAudio(clipPatch);
+            reaction?.Invoke();
+        });
+    }
 }

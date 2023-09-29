@@ -24,11 +24,13 @@ public static class UnityTools
     }
     public static IDisposable Subscribe(this Button button, Action onClick)
     {
-        return button.onClick.Subscribe(onClick);
+        return button?.onClick.Subscribe(onClick);
     }
     public static IDisposable Subscribe(this UnityEvent unityEvent, Action action)
     {
-        return new DisposableAction(() => unityEvent.AddListener(() => action?.Invoke()));
+        UnityAction unityAction = () => action?.Invoke();
+        unityEvent.AddListener(unityAction);
+        return new DisposableAction(() => unityEvent.RemoveListener(unityAction));
     }
     public static void SetAction(this UnityEvent unityEvent, Action action, bool clearOther = true)
     {

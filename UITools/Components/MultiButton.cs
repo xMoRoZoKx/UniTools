@@ -12,15 +12,16 @@ public class MultiButtonAction
     public string name;
     public UnityEvent onClick = new UnityEvent();
 }
-public class MultiButton : Selectable, IPointerClickHandler, IEventSystemHandler, ISubmitHandler
+public class MultiButton : Selectable, IPointerClickHandler, IEventSystemHandler
 {
-    [SerializeField] public List<MultiButtonAction> actions;
-    [SerializeField] public TextMeshProUGUI buttonName;
+    [SerializeField] private List<MultiButtonAction> actions;
+    [SerializeField] private TextMeshProUGUI buttonName;
     private int currentActionIdx = 0;
     public void AddAction(string name, Action onClick)
     {
         var action = new MultiButtonAction() { name = name };
         action.onClick.AddListener(() => onClick?.Invoke());
+        
         actions.Add(action);
     }
 
@@ -37,16 +38,12 @@ public class MultiButton : Selectable, IPointerClickHandler, IEventSystemHandler
     private void OnClick()
     {
         var currentAction = actions[currentActionIdx];
-        buttonName.text = currentAction.name;
-        currentAction.onClick?.Invoke();
 
+        buttonName.text = currentAction.name;
+
+        currentAction.onClick?.Invoke();
 
         currentActionIdx++;
         if (currentActionIdx >= actions.Count) currentActionIdx = 0;
-    }
-
-    public void OnSubmit(BaseEventData eventData)
-    {
-        throw new NotImplementedException();
     }
 }

@@ -14,7 +14,7 @@ namespace Tools.Reactive
     }
 
     [System.Serializable]
-    public class ReactiveList<T> : List<T>, IReactiveCollection<T>
+    public class ReactiveList<T> : List<T>, IReactiveList<T>
     {
         [NonSerialized] EventStream<(T, CollectionEvent)> _eventsForEach;
         EventStream<(T, CollectionEvent)> eventsForEach => _eventsForEach ??= new EventStream<(T, CollectionEvent)>();
@@ -110,11 +110,11 @@ namespace Tools.Reactive
         public IDisposable Subscribe(Action<List<T>> onChangedEvent) => eventStream.Subscribe(onChangedEvent); //SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
     }
-    public interface IReactiveCollection<T> : IList<T>, IReadOnlyReactiveCollection<T>
+    public interface IReactiveList<T> : IList<T>, IReadOnlyReactiveList<T>
     {
     }
     
-    public interface IReadOnlyReactiveCollection<T> : IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>
+    public interface IReadOnlyReactiveList<T> : IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>
     {
         public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement);
     }

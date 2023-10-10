@@ -65,9 +65,11 @@ public class GridSwiper<Data, View> : IDisposable where View : Component
         connections += page.SubscribeAndInvoke(maxPages, (currentPage, maxPages) =>
         {
             UpdateNavigation();
-            nextBtn.SetActive(maxPages > 1 && currentPage != maxPages - 1);
-            prevBtn.SetActive(maxPages > 1 && currentPage != 0);
+            nextBtn.SetActive(maxPages > 1 && currentPage < maxPages - 1);
+            prevBtn.SetActive(maxPages > 1 && currentPage > 0);
         });
+        
+        if(page.value >= maxPages.value - 1) GoToLast();
 
         UpdateNavigation();
     }
@@ -122,7 +124,7 @@ public class GridSwiper<Data, View> : IDisposable where View : Component
     }
     public void PrevPage()
     {
-        if (page.value == 0) return;
+        if (page.value <= 0) return;
         page.value--;
     }
     public void GoToFirst()

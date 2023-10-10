@@ -22,5 +22,9 @@ namespace Tools
             animator.StartHideAnimation();
             return animator.duration;
         }
+        private void OnDestroy()
+        {
+            animator.DOKill();
+        }
     }
 }

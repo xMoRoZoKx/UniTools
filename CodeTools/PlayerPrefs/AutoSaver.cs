@@ -1,10 +1,11 @@
+using System;
 using System.Diagnostics;
 using Tools.PlayerPrefs;
 
 namespace Tools.Reactive
 {
     [System.Serializable]
-    public class AutoSaver<T> : Reactive<T>
+    public class AutoSaver<T> : Reactive<T>, IAutoSaver<T>
     {
         public string key { get; private set; }
         public string layer { get; private set; }
@@ -19,9 +20,11 @@ namespace Tools.Reactive
 
             this.key = key;
             this.ConnectToSaver(key, layer);
-
-
         }
         public void Save() => this.Save(key, layer);
+        public IDisposable OnDataUpdate(Action<string, T> onUpdate)
+        {
+            return SubscribeAndInvoke(value => onUpdate?.Invoke(key, value));
+        }
     }
 }

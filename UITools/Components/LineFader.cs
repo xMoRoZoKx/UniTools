@@ -7,7 +7,6 @@ public class LineFader : MonoBehaviour
 {
     [SerializeField] private LayerMask cullingMask;
     [SerializeField] private Material cullingMaterial;
-    [SerializeField] private float cameraRadius = 2;
     [SerializeField] private Transform startPoint;
     [SerializeField] private Transform endPoint;
     private RayCaster rayCaster = new();

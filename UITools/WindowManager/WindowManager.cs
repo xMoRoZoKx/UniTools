@@ -23,6 +23,9 @@ namespace Tools
                         return null;
                     }
                     _instance = Instantiate(managers[0]);
+
+                    _instance.SetNewInstance(_instance);
+                    // if (FindObjectOfType<EventSystem>()) GetComponent<EventSystem>().enabled = false;
                 }
                 return _instance;
             }
@@ -33,20 +36,23 @@ namespace Tools
         private List<WindowBase> prefabs;
         private List<WindowBase> freeWindows = new List<WindowBase>();
         private List<WindowBase> shownWindows = new List<WindowBase>();
-        private void Awake()
-        {
-            SetNewInstance(this);
-            nonClickBG.SetActive(false);
-            // if (FindObjectOfType<EventSystem>()) GetComponent<EventSystem>().enabled = false;
-            if (useDontDestroyOnLoad) DontDestroyOnLoad(this);
-        }
         private void SetNewInstance(WindowManager instance)
         {
-            if (_instance != null && _instance != instance) Destroy(_instance.gameObject);
+            if (_instance != null && _instance != instance)
+            {
+                Destroy(_instance.gameObject);
+                return;
+            }
 
             _instance = instance;
             instance.canvas = instance.GetComponent<Canvas>();
+
             instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
+            instance.freeWindows.AddRange(root.GetComponentsInChildren<WindowBase>(true));
+
+            nonClickBG.SetActive(false);
+
+            if (useDontDestroyOnLoad) DontDestroyOnLoad(this);
         }
         public T Show<T>(Action<T> onShown = null) where T : WindowBase
         {
@@ -58,7 +64,7 @@ namespace Tools
             var shownWindows = this.shownWindows.FindAll(w => w is T);
             var windowPrefab = prefabs.Find(w => (String.IsNullOrEmpty(prefabName) || prefabName == w.gameObject.name) && w is T);
 
-            if (!windowPrefab)
+            if (!windowPrefab && freeWindows.Count == 0)
             {
                 if (String.IsNullOrEmpty(prefabName))
                     Debug.LogError($"Window {typeof(T)} not found");
@@ -67,7 +73,7 @@ namespace Tools
 
                 return null;
             };
-            if (freeWindows.Count > 0 && windowPrefab.isReusableView)
+            if (freeWindows.Count > 0 && (windowPrefab == null || windowPrefab.isReusableView))
             {
                 return ShowExistView((T)freeWindows.Find(w => typeof(T) == w.GetType()), onShown);
             }

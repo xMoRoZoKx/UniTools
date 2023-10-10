@@ -51,6 +51,11 @@ namespace Tools
             //if (canvasGroup != null) canvasGroup.interactable = true;
             onCompleted?.Invoke();
         }
+        public void DOKill()
+        {
+            animateObjects.ForEach(animateObject => animateObject.transform.DOKill());
+            canvasGroup.DOKill();
+        }
     }
 
     public class StateData
@@ -96,7 +101,7 @@ namespace Tools
             this.transform = transform;
             this.settings = settings;
         }
-        [SerializeField] private Transform transform;
+        [field: SerializeField] public Transform transform { get; private set; }
         [SerializeField] private bool useDefaultSettings = true;
         [SerializeField] private AnimationSettings settings = new AnimationSettings();
         private StateData startState;
@@ -147,10 +152,14 @@ namespace Tools
 
             await TaskTools.WaitForSeconds(duration / 100 * settings.offset);
 
+            if (transform == null) return;
+
             if (!settings.scaleForce.isZeroVector) transform.DOScale(startState.Scale / settings.scaleForce, duration);//.OnComplete(() => transform.localScale = startState.Scale);
             if (settings.displacement != Vector3.zero) transform.DOMove(startState.Position + settings.displacement, duration);//.OnComplete(() => transform.position = startState.Position);
+
             await TaskTools.WaitForSeconds(duration);
-            Reset();
+
+            if (transform != null) Reset();
         }
     }
 }

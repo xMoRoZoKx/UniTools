@@ -4,6 +4,7 @@ using System.Linq;
 using Tools.PlayerPrefs;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Tools.Reactive
 {
@@ -109,23 +110,8 @@ namespace Tools.Reactive
 
             return connections;
         }
-        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
-        {
-            reactive.GetSave(saveKey, layer);
-            reactive.SubscribeAndInvoke(value => reactive.Save(saveKey, layer));
-            // reactive.SaveEachSeconds(saveKey); // IN TESTING
-        }
-        public static void Save<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
-        {
-            var val = reactive.GetValue();
-            PlayerPrefsPro.Set(saveKey, reactive.GetValue(), layer);
-        }
-        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
-        {
-            if (reactive == null) return reactive;
-            reactive.SetValue(PlayerPrefsPro.HasKey(saveKey, layer) ? PlayerPrefsPro.Get<T>(saveKey, layer) : reactive.GetValue());
-            return reactive;
-        }
+
+        
         //JSON UTILS
         public static string ToJson<T>(this IReactive<T> reactive)
         {

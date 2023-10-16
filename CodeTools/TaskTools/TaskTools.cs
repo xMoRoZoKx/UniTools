@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     public static class TaskTools
     {

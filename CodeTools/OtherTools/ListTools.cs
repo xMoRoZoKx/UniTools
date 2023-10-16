@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tools.Reactive;
+using UniTools.Reactive;
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     public static class ListTools
     {
@@ -33,6 +33,13 @@ namespace Tools
         {
             if (list.Count == 0) return default;
             return list[UnityEngine.Random.Range(0, list.Count())];
+        }
+        public static void ForEach<T>(this IReadOnlyList<T> list, Action<T> action)
+        {
+            foreach (var t in list)
+            {
+                action?.Invoke(t);
+            }
         }
         public static void ForEach<T>(this T[] arr, Action<T> action)
         {

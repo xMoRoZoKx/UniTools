@@ -1,6 +1,6 @@
 using System;
 
-namespace Tools
+namespace UniTools
 {
     public static class EnumTools
     {

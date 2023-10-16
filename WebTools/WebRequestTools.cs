@@ -2,7 +2,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Tools
+namespace UniTools
 {
     public static class WebRequestTools
     {

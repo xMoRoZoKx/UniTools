@@ -1,5 +1,5 @@
 using UnityEngine;
-namespace Tools
+namespace UniTools
 {
     public class Singleton<T> : ISingleton<T> where T : Singleton<T>, new() 
     {

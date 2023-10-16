@@ -1,12 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Google.MiniJSON;
-using Tools.PlayerPrefs;
+using UniTools.PlayerPrefs;
 using UnityEngine;
 
-
-namespace Tools.Reactive
+namespace UniTools.Reactive
 {
     public class Data
     {

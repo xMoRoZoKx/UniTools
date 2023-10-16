@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tools.PlayerPrefs;
+using UniTools.PlayerPrefs;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-namespace Tools.Reactive
+namespace UniTools.Reactive
 {
     [System.Serializable]
     public class Reactive<T> : IReactive<T>

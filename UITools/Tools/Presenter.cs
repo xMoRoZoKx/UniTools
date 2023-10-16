@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     public class SimplePresenter<View> : IDisposable where View : Component
     {

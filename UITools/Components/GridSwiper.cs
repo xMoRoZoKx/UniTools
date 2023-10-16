@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-using Tools;
-using Tools.Reactive;
+using UniTools;
+using UniTools.Reactive;
 using UnityEngine;
 using UnityEngine.UI;
 [System.Serializable]
@@ -17,14 +17,14 @@ public class GridSwiper<Data, View> : IDisposable where View : Component
     [SerializeField] private View prefab;
 
     private Connections connections = new Connections();
-    private IReactiveList<Data> allData;
+    private IReadOnlyReactiveList<Data> allData;
     private Reactive<int> page = new Reactive<int>();
     private Reactive<int> maxPages = new Reactive<int>();
     private Action<View, Data> onShown;
 
     public IReadOnlyReactive<int> CurrentPage => page;
 
-    public void Show(IReactiveList<Data> data, Action<View, Data> onShown, int currentPage = 0)
+    public void Show(IReadOnlyReactiveList<Data> data, Action<View, Data> onShown, int currentPage = 0)
     {
         if (data == null) return;
 

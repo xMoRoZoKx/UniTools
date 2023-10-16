@@ -2,9 +2,9 @@ using System.Collections;
 using System;
 using UnityEngine;
 using UnityEngine.Networking;
-using Tools.PlayerPrefs;
+using UniTools.PlayerPrefs;
 
-namespace Tools
+namespace UniTools
 {
     public static class WebLoader
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
-using Tools;
+using UniTools;
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     [System.Serializable]
     public class WindowAnimator

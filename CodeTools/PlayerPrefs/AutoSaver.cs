@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
-using Tools.PlayerPrefs;
+using UniTools.PlayerPrefs;
 
-namespace Tools.Reactive
+namespace UniTools.Reactive
 {
     [System.Serializable]
     public class AutoSaver<T> : Reactive<T>, IAutoSaver<T>

@@ -4,19 +4,27 @@ using System.Collections.Generic;
 [System.Serializable]
 public class EventStream<T> : IDisposable
 {
-    List<Action<T>> actions = new List<Action<T>>();
+    List<(Action<T>, bool)> actions = new List<(Action<T>, bool)>();
     public IDisposable Subscribe(Action<T> action)
     {
-        actions.Add(action);
-        return new DisposableEvent(() => actions.Remove(action));
+        var item = (action, false);
+        actions.Add(item);
+        return new DisposableEvent(() => actions.Remove(item));
+    }
+    public IDisposable SubscribeOnce(Action<T> action)
+    {
+        var item = (action, true);
+        actions.Add(item);
+        return new DisposableEvent(() => actions.Remove(item));
     }
     public void Invoke(T value)
     {
         var count = actions.Count;
         for (int i = 0; i < count; i++)
         {
-            actions[i]?.Invoke(value);
+            actions[i].Item1?.Invoke(value);
         }
+        actions.RemoveAll(a => a.Item2);
     }
     public void DisonnectAll() => actions.Clear();
 

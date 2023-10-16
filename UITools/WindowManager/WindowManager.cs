@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tools;
+using UniTools;
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     [RequireComponent(typeof(Canvas))]
     public class WindowManager : MonoBehaviour

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     public static class ColorTools
     {

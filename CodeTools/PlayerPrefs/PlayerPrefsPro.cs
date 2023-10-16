@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 // using Newtonsoft.Json;
 
-namespace Tools.PlayerPrefs
+namespace UniTools.PlayerPrefs
 {
     public static class PlayerPrefsPro
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Tools
+namespace UniTools
 {
     public class PresenterIgnore : MonoBehaviour {}
 }

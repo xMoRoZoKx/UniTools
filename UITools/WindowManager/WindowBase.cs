@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace Tools
+namespace UniTools
 {
     public class WindowBase : ConnectableMonoBehaviour
     {

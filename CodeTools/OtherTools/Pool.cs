@@ -25,7 +25,7 @@ public class Pool
     {
         if (prefabs.Count == 0)
         {
-            Debug.Log("prefabs not seted");
+            Debug.Log($"prefabs with type {typeof(T)} not seted");
         }
         var existView = (T)pool.Find(o => o is T && !o.gameObject.activeInHierarchy && (spawnCondition == null || spawnCondition.Invoke((T)o)));
         if (existView != null)

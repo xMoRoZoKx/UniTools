@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UniTools
 {
-    public class TaskController
+    public class WaitController
     {
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 

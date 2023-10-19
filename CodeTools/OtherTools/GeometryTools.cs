@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace UniTools
@@ -8,6 +9,9 @@ namespace UniTools
         public static Vector3 WithZ(this Vector3 from, float z) => new Vector3(from.x, from.y, z);
         public static Vector3 WithX(this Vector3 from, float x) => new Vector3(x, from.y, from.z);
         public static Vector3 WithY(this Vector3 from, float y) => new Vector3(from.x, y, from.z);
+        public static Vector3 WithZ(this Vector3 from, Func<float, float> zFunc) => new Vector3(from.x, from.y, zFunc.Invoke(from.z));
+        public static Vector3 WithX(this Vector3 from, Func<float, float> xFunc) => new Vector3(xFunc.Invoke(from.x), from.y, from.z);
+        public static Vector3 WithY(this Vector3 from, Func<float, float> yFunc) => new Vector3(from.x, yFunc.Invoke(from.y), from.z);
         public static Vector2 Direction(this Vector2 from, Vector2 to) => (to - from).normalized;
         public static Vector2 WithX(this Vector2 from, float x) => new Vector2(x, from.y);
         public static Vector2 WithY(this Vector2 from, float y) => new Vector2(from.x, y);

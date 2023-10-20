@@ -13,7 +13,7 @@ public static class UnityTools
     }
     public static T GetOrAddComponent<T>(this Component component) where T : Component
     {
-        var c = component.gameObject.GetComponent<T>();
+        var c = component.gameObject.GetComponent<T>();// ?? component.gameObject.AddComponent<T>();
         if (c == null) c = component.gameObject.AddComponent<T>();
         return c;
     }

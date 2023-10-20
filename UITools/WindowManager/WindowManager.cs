@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UniTools;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace UniTools
 {
@@ -16,16 +17,21 @@ namespace UniTools
             {
                 if (_instance == null)
                 {
-                    var managers = Resources.LoadAll<WindowManager>("");
+                    var managers = FindObjectsOfType<WindowManager>(true).ToList();
+
                     if (managers.Count() == 0)
                     {
-                        Debug.LogError("Window manager not found");
+                        Debug.LogError("Spawn default manager");
+
+                        _instance = Instantiate(Resources.LoadAll<WindowManager>("")[0]);
+
                         return null;
                     }
-                    _instance = Instantiate(managers[0]);
+                    else _instance = managers[0];
 
+                    _instance.SetActive(true);
                     _instance.SetNewInstance(_instance);
-                    // if (FindObjectOfType<EventSystem>()) GetComponent<EventSystem>().enabled = false;
+                    // if (FindObjectOfType<EventSystem>()) _instance.GetComponent<EventSystem>().enabled = false;
                 }
                 return _instance;
             }
@@ -36,6 +42,11 @@ namespace UniTools
         private List<WindowBase> prefabs;
         private List<WindowBase> freeWindows = new List<WindowBase>();
         private List<WindowBase> shownWindows = new List<WindowBase>();
+        private void Awake()
+        {
+            if (_instance == null) SetNewInstance(this);
+            gameObject.SetActive(_instance == this);
+        }
         private void SetNewInstance(WindowManager instance)
         {
             if (_instance != null && _instance != instance)
@@ -86,7 +97,7 @@ namespace UniTools
 
             freeWindows.Remove(window);
 
-            return (T)window;
+            return window;
         }
         private T CreateView<T>(T windowPrefab, Action<T> onShown) where T : WindowBase
         {
@@ -94,7 +105,7 @@ namespace UniTools
 
             Show(window, onShown);
 
-            return (T)window;
+            return window;
         }
         private void Show<T>(T window, Action<T> onShown) where T : WindowBase
         {

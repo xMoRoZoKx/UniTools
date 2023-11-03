@@ -41,7 +41,7 @@ namespace UniTools.Reactive
         }
         public IDisposable SubscribeAndInvoke(Action<T> onChangedEvent)
         {
-            onChangedEvent.Invoke(_value);
+            onChangedEvent.Invoke(value);
             return Subscribe(onChangedEvent);
         }
         public virtual IDisposable Subscribe(Action<T> onChangedEvent)
@@ -121,6 +121,7 @@ namespace UniTools.Reactive
                 updater = reactive,
                 func = func
             };
+            
             return result;
         }
         //JSON UTILS

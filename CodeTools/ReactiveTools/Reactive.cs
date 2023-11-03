@@ -20,8 +20,8 @@ namespace UniTools.Reactive
         }
         [SerializeField] protected T _value;
         protected int lastSetedHash;
-        [NonSerialized] EventStream<(T, T)> _eventStream;
-        EventStream<(T, T)> eventStream => _eventStream ??= new EventStream<(T, T)>();
+        [NonSerialized] protected EventStream<(T, T)> _eventStream;
+        protected EventStream<(T, T)> eventStream => _eventStream ??= new EventStream<(T, T)>();
         public virtual T value
         {
             get
@@ -44,10 +44,13 @@ namespace UniTools.Reactive
             onChangedEvent.Invoke(_value);
             return Subscribe(onChangedEvent);
         }
-        public IDisposable Subscribe(Action<T> onChangedEvent) => eventStream.Subscribe(val =>
+        public virtual IDisposable Subscribe(Action<T> onChangedEvent)
         {
-            onChangedEvent(val.Item2);
-        });
+            return eventStream.Subscribe(val =>
+            {
+                onChangedEvent(val.Item2);
+            });
+        }
         public IDisposable Buffer(Action<T, T> old_New) => eventStream.Subscribe(val =>
         {
             old_New(val.Item1, val.Item2);
@@ -69,7 +72,7 @@ namespace UniTools.Reactive
     {
         public void SetValue(T value);
     }
-    
+
     public interface IReadOnlyReactive<T>
     {
         public T Value => GetValue();
@@ -110,7 +113,16 @@ namespace UniTools.Reactive
             return connections;
         }
 
-        
+        //TOOLS
+        public static ReactiveFunc<T1, T2> Func<T1, T2>(this IReactive<T1> reactive, Func<T1, T2> func)
+        {
+            var result = new ReactiveFunc<T1, T2>
+            {
+                updater = reactive,
+                func = func
+            };
+            return result;
+        }
         //JSON UTILS
         public static string ToJson<T>(this IReactive<T> reactive)
         {

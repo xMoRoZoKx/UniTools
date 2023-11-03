@@ -114,7 +114,7 @@ namespace UniTools
         {
             return idx < list.Count && idx >= 0;
         }
-        public static Presenter<Data, View> Present<Data, View>(this IReadOnlyList<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : Component
+        public static Presenter<Data, View> Present<Data, View>(this IEnumerable<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : Component
         {
             var presenter = new Presenter<Data, View>();
             if (list is ReactiveList<Data> reactiveList)

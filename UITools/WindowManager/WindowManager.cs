@@ -110,7 +110,7 @@ namespace UniTools
         private void Show<T>(T window, Action<T> onShown) where T : WindowBase
         {
             window.gameObject.SetActive(true);
-            window.transform.SetSiblingIndex(window.isPriorityWindow ? root.childCount - 1 : shownWindows.FindAll(w => !w.isPriorityWindow).Count);//root.childCount - 1);
+
             window.OnOpened();
             window.active = true;
 
@@ -120,9 +120,22 @@ namespace UniTools
 
             shownWindows.Add(window);
 
+            shownWindows.Sort((sw1, sw2) => sw1.orderBy > sw2.orderBy ? 1 : -1);
+            for (int i = 0; i < shownWindows.Count; i++)
+            {
+                shownWindows[i].transform.SetSiblingIndex(i);
+            }
+            shownWindows.ForEach(sw => 
+            {
+                if(sw.active && sw.needHideThenWindowIsNotTop)
+                {
+                    sw.SetActive(sw == shownWindows.Last());
+                } 
+            });
+
             onShown?.Invoke(window);
         }
-        public void Close<T>() where T : WindowBase
+        public void CloseTop<T>() where T : WindowBase
         {
             Close(GetOpenedWindow<T>());
         }

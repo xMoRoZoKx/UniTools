@@ -9,7 +9,7 @@ namespace UniTools
         [field: SerializeField, Header("Optional")] public Button closeButton { get; private set; }
         [field: SerializeField, Space] public bool isReusableView { get; private set; } = true;
         [field: SerializeField] public bool needHideThenWindowIsNotTop { get; private set; } = false;
-        [field: SerializeField] public bool isPriorityWindow { get; private set; } = false;
+        [field: SerializeField] public int orderBy { get; private set; } = 0;
         public EventStream onClose { get; private set; } = new EventStream();
         [HideInInspector] public bool active = false;
         protected virtual void Awake()

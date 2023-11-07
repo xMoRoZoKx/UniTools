@@ -32,6 +32,13 @@ public static class UnityTools
         unityEvent.AddListener(unityAction);
         return new DisposableAction(() => unityEvent.RemoveListener(unityAction));
     }
+    
+    public static IDisposable Subscribe<T>(this UnityEvent<T> unityEvent, Action<T> action)
+    {
+        UnityAction<T> unityAction = val => action?.Invoke(val);
+        unityEvent.AddListener(unityAction);
+        return new DisposableAction(() => unityEvent.RemoveListener(unityAction));
+    }
     public static void SetAction(this UnityEvent unityEvent, Action action, bool clearOther = true)
     {
         if (clearOther) unityEvent?.RemoveAllListeners();

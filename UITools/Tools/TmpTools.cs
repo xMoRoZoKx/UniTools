@@ -31,6 +31,6 @@ public static class TmpTools
     }
     public static IDisposable SetTextReactive<T>(this TMP_Text tmpText, IReadOnlyReactive<T> reactive, Func<T, string> textFunc = null)
     {
-        return reactive?.SubscribeAndInvoke(val => tmpText.text = textFunc == null ? val.ToString() : textFunc.Invoke(val));
+        return reactive?.SubscribeAndInvoke(val => tmpText.text = textFunc == null ? val?.ToString() : textFunc?.Invoke(val));
     }
 }

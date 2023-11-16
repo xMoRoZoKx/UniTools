@@ -25,13 +25,16 @@ public static class ByteSerializer
     {
         if (arrBytes == null || arrBytes.Length == 0) return default;
 
-        T obj;
+        T obj = default;
         using (MemoryStream memStream = new MemoryStream())
         {
             BinaryFormatter binForm = new BinaryFormatter();
             memStream.Write(arrBytes, 0, arrBytes.Length);
             memStream.Seek(0, SeekOrigin.Begin);
-            obj = (T)binForm.Deserialize(memStream);
+            var from = binForm.Deserialize(memStream);
+
+            if (from is T)
+                obj = (T)from;
         };
 
         return obj;

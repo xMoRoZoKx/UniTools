@@ -28,7 +28,7 @@ namespace UniTools.PlayerPrefs
         // private static JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         #region Seters
-        public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set<T>(key, layerName, obj, true, true);
+        public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set(key, layerName, obj, true, true);
         private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
         {
             // SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key, needAddToKeysList, needAddToLayersList, layerName);

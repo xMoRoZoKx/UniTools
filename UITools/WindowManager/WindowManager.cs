@@ -77,7 +77,7 @@ namespace UniTools
 
             if (!windowPrefab && freeWindows.Count == 0)
             {
-                if (String.IsNullOrEmpty(prefabName))
+                if (string.IsNullOrEmpty(prefabName))
                     Debug.LogError($"Window {typeof(T)} not found");
                 else
                     Debug.LogError($"Window by type: {typeof(T)}, with name: {prefabName} not found");
@@ -103,6 +103,8 @@ namespace UniTools
         {
             var window = Instantiate(windowPrefab, root);
 
+            window.gameObject.name = windowPrefab.gameObject.name;
+
             Show(window, onShown);
 
             return window;
@@ -119,21 +121,26 @@ namespace UniTools
             this.Wait(window.ShowAnimation(), () => nonClickBG.SetActive(false));
 
             shownWindows.Add(window);
+            
 
+            OrderViews();
+
+            onShown?.Invoke(window);
+        }
+        private void OrderViews()
+        {
             shownWindows.Sort((sw1, sw2) => sw1.orderBy > sw2.orderBy ? 1 : -1);
             for (int i = 0; i < shownWindows.Count; i++)
             {
                 shownWindows[i].transform.SetSiblingIndex(i);
             }
-            shownWindows.ForEach(sw => 
+            shownWindows.ForEach(sw =>
             {
-                if(sw.active && sw.needHideThenWindowIsNotTop)
+                if (sw.active && sw.needHideThenWindowIsNotTop)
                 {
                     sw.SetActive(sw == shownWindows.Last());
-                } 
+                }
             });
-
-            onShown?.Invoke(window);
         }
         public void CloseTop<T>() where T : WindowBase
         {
@@ -147,17 +154,21 @@ namespace UniTools
             if (!win) return;
 
             win.onClose.Invoke();
+            win.onCloseAction?.Invoke();
             win.OnClosed();
             win.connections.DisconnectAll();
             win.active = false;
 
             nonClickBG.SetActive(true);
 
+            shownWindows.Remove(win);
+            OrderViews();
+
             this.Wait(win.CloseAnimation(), () =>
             {
                 nonClickBG.SetActive(false);
                 freeWindows.Add(win);
-                shownWindows.Remove(win);
+
 
                 if (win.isReusableView) win.gameObject.SetActive(false);
                 else
@@ -178,6 +189,11 @@ namespace UniTools
         public T GetOpenedWindow<T>() where T : WindowBase
         {
             T win = (T)shownWindows.Find(w => w is T);
+            return win;
+        }
+        public T GetWindowPrefab<T>() where T : WindowBase
+        {
+            T win = (T)prefabs.Find(w => w is T);
             return win;
         }
         void OnGUI()

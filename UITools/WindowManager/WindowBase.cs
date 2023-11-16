@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -11,6 +12,7 @@ namespace UniTools
         [field: SerializeField] public bool needHideThenWindowIsNotTop { get; private set; } = false;
         [field: SerializeField] public int orderBy { get; private set; } = 0;
         public EventStream onClose { get; private set; } = new EventStream();
+        public Action onCloseAction;
         [HideInInspector] public bool active = false;
         protected virtual void Awake()
         {

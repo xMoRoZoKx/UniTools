@@ -6,18 +6,19 @@ using UnityEngine;
 namespace UniTools.Reactive
 {
     [System.Serializable]
-    public enum CollectionEvent
+    public enum CollectionEventType
     {
-        Remove,
-        Add,
-        Replace
+        Removed,
+        Added,
+        Replace,
+        None
     }
 
     [System.Serializable]
     public class ReactiveList<T> : List<T>, IReactiveList<T>
     {
-        [NonSerialized] EventStream<(T, CollectionEvent)> _eventsForEach;
-        EventStream<(T, CollectionEvent)> eventsForEach => _eventsForEach ??= new EventStream<(T, CollectionEvent)>();
+        [NonSerialized] EventStream<(T, CollectionEventType, int)> _eventsForEach;
+        EventStream<(T, CollectionEventType, int)> eventsForEach => _eventsForEach ??= new EventStream<(T, CollectionEventType, int)>();
         [NonSerialized] EventStream<List<T>> _eventStream;
         EventStream<List<T>> eventStream => _eventStream ??= new EventStream<List<T>>();
         public int lastSetedHash = 0;
@@ -29,7 +30,7 @@ namespace UniTools.Reactive
                 if (value.GetHashCode() != base[index].GetHashCode())
                 {
                     base[index] = value;
-                    InvokeElementEvents(value, CollectionEvent.Add);
+                    InvokeElementEvents(value, CollectionEventType.Added, index);
                     InvokeListEvents();
                     lastSetedHash = this.GetHashCode();
                 }
@@ -40,14 +41,14 @@ namespace UniTools.Reactive
             // actionsAndKeys.ForEach(actAndKey => actAndKey.Item1.Invoke(this));
             eventStream.Invoke(this);
         }
-        private void InvokeElementEvents(T value, CollectionEvent type)
+        private void InvokeElementEvents(T value, CollectionEventType type, int idx)
         {
-            eventsForEach.Invoke((value, type));
+            eventsForEach.Invoke((value, type, idx));
         }
         public new void Add(T item)
         {
             base.Add(item);
-            InvokeElementEvents(item, CollectionEvent.Add);
+            InvokeElementEvents(item, CollectionEventType.Added, Count - 1);
             InvokeListEvents();
         }
 
@@ -69,15 +70,16 @@ namespace UniTools.Reactive
         public new void Insert(int index, T item)
         {
             base.Insert(index, item);
-            InvokeElementEvents(base[index], CollectionEvent.Add);
+            InvokeElementEvents(base[index], CollectionEventType.Added, index);
             InvokeListEvents();
         }
 
         public new bool Remove(T item)
         {
+            var idx = IndexOf(item);
             if (base.Remove(item))
             {
-                InvokeElementEvents(item, CollectionEvent.Remove);
+                InvokeElementEvents(item, CollectionEventType.Removed, idx);
                 InvokeListEvents();
                 return true;
             }
@@ -86,13 +88,21 @@ namespace UniTools.Reactive
 
         public new void RemoveAt(int index)
         {
-            InvokeElementEvents(base[index], CollectionEvent.Remove);
+            InvokeElementEvents(base[index], CollectionEventType.Removed, index);
             InvokeListEvents();
             base.RemoveAt(index);
         }
 
 
-        public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement) => eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2));
+        public IDisposable SubscribeForEachAndInvoke(Action<T, CollectionEventType, int> onChangeElement)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                onChangeElement.Invoke(this[i], CollectionEventType.Added, i);
+            }
+            return eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2, value.Item3));
+        }
+        public IDisposable SubscribeForEach(Action<T, CollectionEventType, int> onChangeElement) => eventsForEach.Subscribe(value => onChangeElement.Invoke(value.Item1, value.Item2, value.Item3));
         public List<T> GetValue() => this.ToList();
 
         public void SetValue(List<T> value)
@@ -109,13 +119,23 @@ namespace UniTools.Reactive
         public void UnsubscribeAll() => eventStream.DisonnectAll();
         public IDisposable Subscribe(Action<List<T>> onChangedEvent) => eventStream.Subscribe(onChangedEvent); //SubscribeWithKey(onChangedEvent, onChangedEvent.GetHashCode().ToString());
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
+
+        public void InvokeEvents()
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                InvokeElementEvents(this[i], CollectionEventType.None, i);
+            }
+            InvokeListEvents();
+        }
     }
     public interface IReactiveList<T> : IList<T>, IReadOnlyReactiveList<T>
     {
     }
-    
+
     public interface IReadOnlyReactiveList<T> : IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>
     {
-        public IDisposable SubscribeForEach(Action<T, CollectionEvent> onChangeElement);
+        public IDisposable SubscribeForEach(Action<T, CollectionEventType, int> onChangeElement);
+        public IDisposable SubscribeForEachAndInvoke(Action<T, CollectionEventType, int> onChangeElement);
     }
 }

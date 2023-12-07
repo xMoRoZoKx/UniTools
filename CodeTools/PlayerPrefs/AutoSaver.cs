@@ -28,10 +28,14 @@ namespace UniTools.Reactive
             this.key = key;
             this.ConnectToSaver(key, layer);
         }
-        public void Save() => this.Save(key, layer);
+        public void Save()
+        {
+            this.Save(key, layer);
+            InvokeEvents();
+        }
         public IDisposable OnDataUpdate(Action<string, T> onUpdate)
         {
-            return SubscribeAndInvoke(value => onUpdate?.Invoke(key, value));
+            return Subscribe(value => onUpdate?.Invoke(key, value));
         }
     }
 }

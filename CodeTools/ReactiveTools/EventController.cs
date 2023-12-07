@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 
+public interface IEventStream<T>
+{
+    public IDisposable Subscribe(Action<T> action);
+}
 [System.Serializable]
-public class EventStream<T> : IDisposable
+public class EventStream<T> : IEventStream<T>, IDisposable
 {
     List<(Action<T>, bool)> actions = new List<(Action<T>, bool)>();
     public IDisposable Subscribe(Action<T> action)
@@ -51,8 +55,12 @@ public class EventStream<T> : IDisposable
         }
     }
 }
+public interface IEventStream
+{
+    public IDisposable Subscribe(Action action);
+}
 [System.Serializable]
-public class EventStream : IDisposable
+public class EventStream : IEventStream, IDisposable
 {
     List<Action> actions = new List<Action>();
     public IDisposable Subscribe(Action action)

@@ -17,7 +17,11 @@ namespace UniTools.Reactive
             this.ConnectToSaver(key, layer);
         }
 
-        public void Save() => this.Save(key, layer);
+        public void Save()
+        {
+            this.Save(key, layer);
+            InvokeEvents();
+        }
 
         public IDisposable OnDataUpdate(Action<string, List<T>> onUpdate)
         {

@@ -22,6 +22,7 @@ namespace UniTools.Reactive
         protected int lastSetedHash;
         [NonSerialized] protected EventStream<(T, T)> _eventStream;
         protected EventStream<(T, T)> eventStream => _eventStream ??= new EventStream<(T, T)>();
+        private T prevValue;
         public virtual T value
         {
             get
@@ -32,9 +33,9 @@ namespace UniTools.Reactive
             {
                 if ((value != null && _value == null) || (value == null && _value != null) || (value != null && !value.Equals(_value)))//.GetHashCode() != _value?.GetHashCode())
                 {
-                    var oldVal = _value;
+                    prevValue = _value;
                     _value = value;
-                    eventStream.Invoke((oldVal, value));
+                    InvokeEvents();
                     lastSetedHash = _value != null ? _value.GetHashCode() : 0;
                 }
             }
@@ -67,6 +68,11 @@ namespace UniTools.Reactive
         {
             this.value = value;
         }
+
+        public void InvokeEvents()
+        {
+            eventStream.Invoke((prevValue, value));
+        }
     }
     public interface IReactive<T> : IReadOnlyReactive<T>
     {
@@ -77,6 +83,7 @@ namespace UniTools.Reactive
     {
         public T Value => GetValue();
         public T GetValue();
+        public void InvokeEvents();
         public IDisposable SubscribeAndInvoke(Action<T> onChangedEvent);
         public IDisposable Subscribe(Action<T> onChangedEvent);
         public IDisposable Subscribe(Action onChangedEvent) => Subscribe(val => onChangedEvent?.Invoke());
@@ -121,7 +128,7 @@ namespace UniTools.Reactive
                 updater = reactive,
                 func = func
             };
-            
+
             return result;
         }
         //JSON UTILS

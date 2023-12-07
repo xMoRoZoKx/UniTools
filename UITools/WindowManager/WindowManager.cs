@@ -4,12 +4,15 @@ using System.Linq;
 using UniTools;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Zenject;
 
 namespace UniTools
 {
     [RequireComponent(typeof(Canvas))]
     public class WindowManager : MonoBehaviour
     {
+        [Inject] private DiContainer diContainer;
+
         private static WindowManager _instance;
         public static WindowManager Instance
         {
@@ -101,8 +104,8 @@ namespace UniTools
         }
         private T CreateView<T>(T windowPrefab, Action<T> onShown) where T : WindowBase
         {
-            var window = Instantiate(windowPrefab, root);
-
+            var window = diContainer.InstantiatePrefabForComponent<T>(windowPrefab, root);
+            
             window.gameObject.name = windowPrefab.gameObject.name;
 
             Show(window, onShown);
@@ -121,12 +124,14 @@ namespace UniTools
             this.Wait(window.ShowAnimation(), () => nonClickBG.SetActive(false));
 
             shownWindows.Add(window);
-            
+
 
             OrderViews();
+            if (IsTopWindow(window)) window.OnTop();
 
             onShown?.Invoke(window);
         }
+        public bool IsTopWindow<T>(T window) where T : WindowBase => shownWindows.LastOrDefault() == window;
         private void OrderViews()
         {
             shownWindows.Sort((sw1, sw2) => sw1.orderBy > sw2.orderBy ? 1 : -1);
@@ -138,7 +143,7 @@ namespace UniTools
             {
                 if (sw.active && sw.needHideThenWindowIsNotTop)
                 {
-                    sw.SetActive(sw == shownWindows.Last());
+                    sw.SetActive(sw == shownWindows.LastOrDefault());
                 }
             });
         }
@@ -163,6 +168,7 @@ namespace UniTools
 
             shownWindows.Remove(win);
             OrderViews();
+            shownWindows.LastOrDefault()?.OnTop();
 
             this.Wait(win.CloseAnimation(), () =>
             {
@@ -178,7 +184,7 @@ namespace UniTools
                 }
             });
         }
-        public void CloseTop() => Close(shownWindows.FindLast(w => w.active == true && w.closeButton != null));
+        public void CloseTop() => Close(shownWindows.LastOrDefault());
         public void CloseAll()
         {
             for (int i = shownWindows.Count - 1; i >= 0; i--)
@@ -188,19 +194,26 @@ namespace UniTools
         }
         public T GetOpenedWindow<T>() where T : WindowBase
         {
-            T win = (T)shownWindows.Find(w => w is T);
-            return win;
+            var win = shownWindows.Find(w => w is T);
+
+            if (win == null) return null;
+
+            return (T)win;
         }
         public T GetWindowPrefab<T>() where T : WindowBase
         {
-            T win = (T)prefabs.Find(w => w is T);
-            return win;
+            var win = prefabs.Find(w => w is T);
+
+            if (win == null) return null;
+
+            return (T)win;
         }
         void OnGUI()
         {
             if (Input.GetKeyUp(KeyCode.Escape))
             {
-                CloseTop();
+                // CloseTop();
+                Close(shownWindows.FindLast(w => w.active == true && w.closeButton != null));
             }
         }
     }

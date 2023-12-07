@@ -11,7 +11,7 @@ namespace UniTools
         [field: SerializeField, Space] public bool isReusableView { get; private set; } = true;
         [field: SerializeField] public bool needHideThenWindowIsNotTop { get; private set; } = false;
         [field: SerializeField] public int orderBy { get; private set; } = 0;
-        public EventStream onClose { get; private set; } = new EventStream();
+        public UnityEvent onClose { get; private set; } = new UnityEvent();
         public Action onCloseAction;
         [HideInInspector] public bool active = false;
         protected virtual void Awake()
@@ -32,5 +32,6 @@ namespace UniTools
         }
         public virtual void OnOpened() { }
         public virtual void OnClosed() { }
+        public virtual void OnTop() { }
     }
 }

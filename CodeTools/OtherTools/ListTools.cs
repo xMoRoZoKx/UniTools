@@ -117,7 +117,7 @@ namespace UniTools
         public static Presenter<Data, View> Present<Data, View>(this IEnumerable<Data> list, View prefab, RectTransform container, Action<View, Data> onShow) where View : Component
         {
             var presenter = new Presenter<Data, View>();
-            if (list is ReactiveList<Data> reactiveList)
+            if (list is IReadOnlyReactiveList<Data> reactiveList)
             {
                 presenter.connections += reactiveList.Subscribe(data => presenter.Present(data, prefab, container, onShow));
             }

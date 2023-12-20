@@ -5,7 +5,7 @@ using UniTools.PlayerPrefs;
 using UniTools.Reactive;
 using UnityEngine;
 
-public interface IAutoSaver<T> 
+public interface IAutoSaver
 {
     // public IDisposable OnDataUpdate(Action<string, T> onUpdate);
     public void Save();

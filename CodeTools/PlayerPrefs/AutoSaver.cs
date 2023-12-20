@@ -12,7 +12,7 @@ namespace UniTools.Reactive
         Layer2
     }
     [System.Serializable]
-    public class AutoSaver<T> : Reactive<T>, IAutoSaver<T>
+    public class AutoSaver<T> : Reactive<T>, IAutoSaver
     {
         public string key { get; private set; }
         public string layer { get; private set; }

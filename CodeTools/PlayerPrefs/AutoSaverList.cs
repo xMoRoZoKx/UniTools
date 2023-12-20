@@ -5,7 +5,7 @@ using UniTools.PlayerPrefs;
 namespace UniTools.Reactive
 {
     [System.Serializable]
-    public class AutoSaverList<T> : ReactiveList<T>, IAutoSaver<T>
+    public class AutoSaverList<T> : ReactiveList<T>, IAutoSaver
     {
         public string key { get; private set; }
         public string layer { get; private set; }

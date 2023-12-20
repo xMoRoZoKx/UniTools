@@ -51,6 +51,10 @@ namespace UniTools.Reactive
             InvokeElementEvents(item, CollectionEventType.Added, Count - 1);
             InvokeListEvents();
         }
+        public void AddWithoutNotification(T item)
+        {
+            base.Add(item);
+        }
 
         public new void AddRange(IEnumerable<T> collection)
         {
@@ -58,6 +62,17 @@ namespace UniTools.Reactive
             {
                 Add(element);
             }
+        }
+
+        public void AddRangeWithoutNotification(IEnumerable<T> collection, bool notificationAfterCompleting = false)
+        {
+            foreach (var element in collection)
+            {
+                AddWithoutNotification(element);
+            }
+
+            if (notificationAfterCompleting)
+                InvokeListEvents();
         }
         public new void Clear()
         {
@@ -67,6 +82,16 @@ namespace UniTools.Reactive
             }
         }
 
+        public void ClearWithoutNotification(bool notificationAfterCompleting = false)
+        {
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                RemoveAtWithoutNotification(0);
+            }
+
+            if (notificationAfterCompleting)
+                InvokeListEvents();
+        }
         public new void Insert(int index, T item)
         {
             base.Insert(index, item);
@@ -86,11 +111,29 @@ namespace UniTools.Reactive
             return false;
         }
 
+        public bool RemoveWithoutNotification(T item)
+        {
+            return base.Remove(item);
+        }
+
         public new void RemoveAt(int index)
         {
             InvokeElementEvents(base[index], CollectionEventType.Removed, index);
             InvokeListEvents();
             base.RemoveAt(index);
+        }
+
+        public void RemoveAtWithoutNotification(int index)
+        {
+            base.RemoveAt(index);
+        }
+        public void UpdateFromWithoutNotification(IEnumerable<T> fromCollection, bool notificationAfterCompleting = false)
+        {
+            ClearWithoutNotification();
+            AddRangeWithoutNotification(fromCollection);
+
+            if (notificationAfterCompleting)
+                InvokeListEvents();
         }
 
 

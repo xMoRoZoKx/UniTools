@@ -92,7 +92,7 @@ namespace UniTools.Reactive
     public static class ReactiveUtils
     {
         //CONNECTED
-        public static IDisposable SubscribeAndInvoke<T1, T2, T3>(this IReactive<T1> reactive1, IReactive<T2> reactive2, IReactive<T3> reactive3, Action<T1, T2, T3> onChangedEvent)
+        public static IDisposable SubscribeAndInvoke<T1, T2, T3>(this IReadOnlyReactive<T1> reactive1, IReadOnlyReactive<T2> reactive2, IReadOnlyReactive<T3> reactive3, Action<T1, T2, T3> onChangedEvent)
         {
             var connections = new Connections();
             connections += reactive1.SubscribeAndInvoke(val => Invoke());
@@ -106,7 +106,7 @@ namespace UniTools.Reactive
 
             return connections;
         }
-        public static IDisposable SubscribeAndInvoke<T1, T2>(this IReactive<T1> reactive1, IReactive<T2> reactive2, Action<T1, T2> onChangedEvent)
+        public static IDisposable SubscribeAndInvoke<T1, T2>(this IReadOnlyReactive<T1> reactive1, IReadOnlyReactive<T2> reactive2, Action<T1, T2> onChangedEvent)
         {
             var connections = new Connections();
             connections += reactive1.SubscribeAndInvoke(val => Invoke());
@@ -121,7 +121,7 @@ namespace UniTools.Reactive
         }
 
         //TOOLS
-        public static ReactiveFunc<T1, T2> Func<T1, T2>(this IReactive<T1> reactive, Func<T1, T2> func)
+        public static ReactiveFunc<T1, T2> Func<T1, T2>(this IReadOnlyReactive<T1> reactive, Func<T1, T2> func)
         {
             var result = new ReactiveFunc<T1, T2>
             {

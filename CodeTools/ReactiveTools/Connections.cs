@@ -11,6 +11,10 @@ public class Connections : IDisposable
         connections.connects.Add(dispos);
         return connections;
     }
+    public void Add(Action action)
+    {
+        connects.Add(new DisposableAction(action));
+    }
     public void DisconnectAll()
     {
         connects.ForEach(c => c?.Dispose());

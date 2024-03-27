@@ -17,9 +17,9 @@ namespace UniTools
             }
             return reactiveList;
         }
-        public static T GetRandom<T>(this IReadOnlyList<T> list, Predicate<T> match)
+        public static T GetRandom<T>(this IEnumerable<T> list, Predicate<T> match)
         {
-            if (list.Count == 0) return default;
+            if (list.Count() == 0) return default;
 
             List<T> newList = new();
             foreach (var item in list)
@@ -29,10 +29,29 @@ namespace UniTools
             var idx = UnityEngine.Random.Range(0, newList.Count());
             return newList.HasIndex(idx) ? newList[idx] : default;
         }
-        public static T GetRandom<T>(this IReadOnlyList<T> list)
+        public static T GetRandom<T>(this IEnumerable<T> list)
         {
-            if (list.Count == 0) return default;
-            return list[UnityEngine.Random.Range(0, list.Count())];
+            if (list.Count() == 0) return default;
+            return list.ElementAt(UnityEngine.Random.Range(0, list.Count()));
+        }
+        public static T GetRandom<T>(this IEnumerable<T> list, Func<T, float> weight)
+        {
+            var notNullList = list.ToList().FindAll(i => weight.Invoke(i) > 0);
+
+            if(notNullList.Count == 0)
+                return default;
+
+            for (int i = 0; i < 1000; i++)
+            {
+                var probability = notNullList.GetRandom();
+
+                if (RandomTools.GetChance(weight.Invoke(probability)))
+                {
+                    return probability;
+                }
+            }
+
+            return notNullList.First();
         }
         public static void ForEach<T>(this IReadOnlyList<T> list, Action<T> action)
         {
@@ -84,6 +103,11 @@ namespace UniTools
         }
         public static List<T> Resize<T>(this List<T> list, int size, T defaultValue = default)
         {
+            return Resize(list, size, i => defaultValue);
+        }
+
+        public static List<T> Resize<T>(this List<T> list, int size, Func<int, T> getValue)
+        {
             int startCount = list.Count;
             if (startCount > size)
             {
@@ -96,7 +120,7 @@ namespace UniTools
             {
                 for (int i = 0; i < size - startCount; i++)
                 {
-                    list.Add(defaultValue);
+                    list.Add(getValue.Invoke(i));
                 }
             }
             return list;

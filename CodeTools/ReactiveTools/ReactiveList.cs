@@ -21,7 +21,7 @@ namespace UniTools.Reactive
         EventStream<(T, CollectionEventType, int)> eventsForEach => _eventsForEach ??= new EventStream<(T, CollectionEventType, int)>();
         [NonSerialized] EventStream<List<T>> _eventStream;
         EventStream<List<T>> eventStream => _eventStream ??= new EventStream<List<T>>();
-        public int lastSetedHash = 0;
+        [HideInInspector] public int lastSetedHash = 0;
         public new T this[int index]
         {
             get => base[index];
@@ -98,7 +98,16 @@ namespace UniTools.Reactive
             InvokeElementEvents(base[index], CollectionEventType.Added, index);
             InvokeListEvents();
         }
-
+        public void RemoveAll(Func<T, bool> condition)
+        {
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                if (condition(this[i]))
+                {
+                    RemoveAt(i);
+                }
+            }
+        }
         public new bool Remove(T item)
         {
             var idx = IndexOf(item);
@@ -119,8 +128,8 @@ namespace UniTools.Reactive
         public new void RemoveAt(int index)
         {
             InvokeElementEvents(base[index], CollectionEventType.Removed, index);
-            InvokeListEvents();
             base.RemoveAt(index);
+            InvokeListEvents();
         }
 
         public void RemoveAtWithoutNotification(int index)
@@ -174,6 +183,7 @@ namespace UniTools.Reactive
     }
     public interface IReactiveList<T> : IList<T>, IReadOnlyReactiveList<T>
     {
+        public void RemoveAll(Func<T, bool> condition);
     }
 
     public interface IReadOnlyReactiveList<T> : IReadOnlyCollection<T>, IReadOnlyList<T>, IReactive<List<T>>

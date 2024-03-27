@@ -30,6 +30,7 @@ namespace UniTools
         {
             return 0;
         }
+
         public virtual void OnOpened() { }
         public virtual void OnClosed() { }
         public virtual void OnTop() { }

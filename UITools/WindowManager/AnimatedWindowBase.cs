@@ -13,7 +13,7 @@ namespace UniTools
         {
             animator.StartShowAnimation(() =>
             {
-                gameObject?.SetActive(true);
+                if(gameObject != null) gameObject.SetActive(true);
             });
             return animator.duration;
         }

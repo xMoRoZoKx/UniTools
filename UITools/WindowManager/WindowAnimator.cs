@@ -36,6 +36,7 @@ namespace UniTools
         public void StartHideAnimation(Action onCompleted = null) => StartAnimation(false, onCompleted);
         private async void StartAnimation(bool isShowing, Action onCompleted = null)
         {
+            DOKill();
             animateObjects.ForEach(ao =>
             {
                 if (isShowing) ao.StartShowAnimation(duration, defaultSettings);

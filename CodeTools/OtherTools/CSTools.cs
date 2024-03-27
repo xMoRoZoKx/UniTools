@@ -35,5 +35,24 @@ namespace UniTools
 
             return results;
         }
+        public static Type GetElementType(this IEnumerable ienumerable) => ienumerable.GetType().GetElementType();
+        public static Type GetGenericType(this object generic, int index) => generic.GetType().GetTypeInfo().GenericTypeArguments[index];
+        public static Type GetEnumerableType(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                return type.GetGenericArguments()[0];
+
+            var iface = (from i in type.GetInterfaces()
+                         where i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                         select i).FirstOrDefault();
+
+            if (iface == null)
+                throw new ArgumentException("Does not represent an enumerable type.", "type");
+
+            return GetEnumerableType(iface);
+        }
     }
 }

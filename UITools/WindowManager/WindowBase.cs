@@ -14,6 +14,7 @@ namespace UniTools
         public UnityEvent onClose { get; private set; } = new UnityEvent();
         public Action onCloseAction;
         [HideInInspector] public bool active = false;
+        public virtual bool canShow => true; 
         protected virtual void Awake()
         {
             closeButton?.OnClickWithSound(Close);
@@ -34,5 +35,6 @@ namespace UniTools
         public virtual void OnOpened() { }
         public virtual void OnClosed() { }
         public virtual void OnTop() { }
+        public virtual void OnBottom() { }
     }
 }

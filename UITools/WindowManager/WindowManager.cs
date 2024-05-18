@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UniTools;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Zenject;
 
 namespace UniTools
@@ -11,7 +10,7 @@ namespace UniTools
     [RequireComponent(typeof(Canvas))]
     public class WindowManager : MonoBehaviour
     {
-        //[Inject] private DiContainer diContainer;
+        [Inject] private DiContainer diContainer;
 
         private static WindowManager _instance;
         public static WindowManager Instance
@@ -24,7 +23,7 @@ namespace UniTools
 
                     if (managers.Count() == 0)
                     {
-                        Debug.LogError("Spawn default manager");
+                        Debug.Log("Spawn default manager");
 
                         _instance = Instantiate(Resources.LoadAll<WindowManager>("")[0]);
 
@@ -34,7 +33,7 @@ namespace UniTools
 
                     _instance.SetActive(true);
                     _instance.SetNewInstance(_instance);
-                    // if (FindObjectOfType<EventSystem>()) _instance.GetComponent<EventSystem>().enabled = false;
+                    // if (FindObjectOfType<EventSystem>()) // TODO new obj // _instance.GetComponent<EventSystem>().enabled = false;
                 }
                 return _instance;
             }
@@ -48,7 +47,7 @@ namespace UniTools
         private void Awake()
         {
             if (_instance == null) SetNewInstance(this);
-            gameObject.SetActive(_instance == this);
+            if (_instance != this) Destroy(gameObject);
         }
         private void SetNewInstance(WindowManager instance)
         {
@@ -61,12 +60,22 @@ namespace UniTools
             _instance = instance;
             instance.canvas = instance.GetComponent<Canvas>();
 
-            instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
+            try
+            {
+                instance.prefabs = Resources.LoadAll<WindowBase>("").ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning(ex.Message);
+            }
+
             instance.freeWindows.AddRange(root.GetComponentsInChildren<WindowBase>(true));
 
             nonClickBG.SetActive(false);
 
             if (useDontDestroyOnLoad) DontDestroyOnLoad(this);
+
+            // instance.prefabs.ForEach(p => Instantiate(p, root));
         }
         public T Show<T>(Action<T> onShown = null) where T : WindowBase
         {
@@ -78,6 +87,7 @@ namespace UniTools
             var shownWindows = this.shownWindows.FindAll(w => w is T);
             var windowPrefab = prefabs.Find(w => (String.IsNullOrEmpty(prefabName) || prefabName == w.gameObject.name) && w is T);
 
+
             if (!windowPrefab && freeWindows.Count == 0)
             {
                 if (string.IsNullOrEmpty(prefabName))
@@ -87,6 +97,9 @@ namespace UniTools
 
                 return null;
             };
+
+            if (!windowPrefab.canShow) return null;
+            
             if (freeWindows.Count > 0 && (windowPrefab == null || windowPrefab.isReusableView))
             {
                 return ShowExistView((T)freeWindows.Find(w => typeof(T) == w.GetType()), onShown);
@@ -104,9 +117,9 @@ namespace UniTools
         }
         private T CreateView<T>(T windowPrefab, Action<T> onShown) where T : WindowBase
         {
-            //var window = diContainer.InstantiatePrefabForComponent<T>(windowPrefab, root);
+            var window = diContainer.InstantiatePrefabForComponent<T>(windowPrefab, root);
 
-            var window = Instantiate(windowPrefab, root);
+            //var window = Instantiate(windowPrefab, root);
 
             window.gameObject.name = windowPrefab.gameObject.name;
 
@@ -129,11 +142,15 @@ namespace UniTools
 
 
             OrderViews();
+
             if (IsTopWindow(window)) window.OnTop();
+            if (shownWindows.Count > 1) shownWindows[^2].OnBottom();
 
             onShown?.Invoke(window);
         }
         public bool IsTopWindow<T>(T window) where T : WindowBase => shownWindows.LastOrDefault() == window;
+        public bool IsOpend<T>(T window) where T : WindowBase => shownWindows.Contains(window);
+        public bool IsOpend<T>() where T : WindowBase => GetOpenedWindow<T>() != null;
         private void OrderViews()
         {
             shownWindows.Sort((sw1, sw2) => sw1.orderBy > sw2.orderBy ? 1 : -1);
@@ -145,9 +162,13 @@ namespace UniTools
             {
                 if (sw.active && sw.needHideThenWindowIsNotTop)
                 {
-                    sw.SetActive(sw == shownWindows.LastOrDefault());
+                    Enable(sw, sw == shownWindows.LastOrDefault());
                 }
             });
+        }
+        public void Enable<T>(T window, bool value) where T : WindowBase
+        {
+            window.SetActive(value);
         }
         public void CloseTop<T>() where T : WindowBase
         {
@@ -217,6 +238,10 @@ namespace UniTools
                 // CloseTop();
                 Close(shownWindows.FindLast(w => w.active == true && w.closeButton != null));
             }
+        }
+        private void OnApplicationQuit()
+        {
+
         }
     }
 }

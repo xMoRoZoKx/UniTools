@@ -20,7 +20,7 @@ namespace UniTools
             {
                 if (root == null)
                 {
-                    Debug.LogError("Need itin animator");
+                    Debug.LogWarning("Need itin animator");
                     return null;
                 }
                 if (_canvasGroup == null) _canvasGroup = root.GetOrAddComponent<CanvasGroup>();

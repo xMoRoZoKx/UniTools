@@ -131,6 +131,12 @@ namespace UniTools.Reactive
 
             return result;
         }
+        //public static ReactiveFunc<T1, T1> SortReactive<T1>(this IReadOnlyReactiveList<T1> reactive, Comparison<T1> comparison) => reactive.Func(lst =>
+        //{
+        //    var result = lst.ToList();
+        //    result.Sort(comparison);
+        //    return result;
+        //});
         //JSON UTILS
         public static string ToJson<T>(this IReactive<T> reactive)
         {

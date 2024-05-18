@@ -7,6 +7,7 @@ namespace UniTools
 {
     public static class TaskTools
     {
+        public static async Task DelaySeconds(float secondsDelay) => await Delay((int)(secondsDelay * 1000));
         public static async Task Delay(int millisecondsDelay)
         {
             var tcs = new TaskCompletionSource<bool>();

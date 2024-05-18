@@ -8,9 +8,15 @@ namespace UniTools
 {
     public static class CSTools
     {
+        public static bool IsNullOrEmpty(this string value)
+        {
+            return value == null || value.Length == 0;
+        }
+
         public static T To<T>(this System.Object obj)
         {
             if (obj is T result) return result;
+            else Debug.LogError("Cast error");
             return default;
         }
         public static string SplitCamelCase(this string input)

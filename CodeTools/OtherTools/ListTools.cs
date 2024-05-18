@@ -53,6 +53,9 @@ namespace UniTools
 
             return notNullList.First();
         }
+        public static List<T> SortWith<T, TKey>(this List<T> list, Func<T, TKey> keySelector) =>  list.OrderByDescending(keySelector)
+                  .ThenBy(item => list.IndexOf(item))
+                  .ToList();
         public static void ForEach<T>(this IReadOnlyList<T> list, Action<T> action)
         {
             foreach (var t in list)

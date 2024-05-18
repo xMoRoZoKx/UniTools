@@ -63,6 +63,15 @@ namespace UniTools.Reactive
                 Add(element);
             }
         }
+        public bool AddIfNotContains(T element)
+        {
+            if (!this.Contains(element))
+            {
+                this.Add(element);
+                return true;
+            }
+            return false;
+        }
 
         public void AddRangeWithoutNotification(IEnumerable<T> collection, bool notificationAfterCompleting = false)
         {

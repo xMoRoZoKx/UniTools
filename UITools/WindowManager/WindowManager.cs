@@ -9,7 +9,6 @@ namespace UniTools
     [RequireComponent(typeof(Canvas))]
     public class WindowManager : MonoBehaviour
     {
-
         private static WindowManager _instance;
         public static WindowManager Instance
         {
@@ -115,6 +114,7 @@ namespace UniTools
         }
         private T CreateView<T>(T windowPrefab, Action<T> onShown) where T : WindowBase
         {
+
             var window = Instantiate(windowPrefab, root);
 
             window.gameObject.name = windowPrefab.gameObject.name;

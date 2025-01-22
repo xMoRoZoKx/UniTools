@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UniTools;
 using UnityEngine;
@@ -21,27 +22,31 @@ public class ConfigStorage
             {
                 if (typeof(IEnumerable).IsAssignableFrom(field.FieldType))
                 {
-                    var objects = Resources.LoadAll(loadAttribute.Patch, field.FieldType.GetEnumerableType());
+                    var elementType = field.FieldType.GetEnumerableType();
+                    var objects = Resources.LoadAll(loadAttribute.Patch, elementType);
 
-                    Array arr = Array.CreateInstance(field.FieldType.GetEnumerableType(), objects.Length);
-                    Array.Copy(objects, arr, objects.Length);
-
-                    // var secondListType = typeof(List<>).MakeGenericType(field.FieldType.GetEnumerableType());
-                    // var result = Activator.CreateInstance(secondListType);
-                    // IList list = (IList)result;
-                    // list.AddRange(arr);
-
-                    field.SetValue(this, arr);//Convert.ChangeType(value, field.FieldType)
-                }
-                else
-                {
-                    var values = Resources.LoadAll(loadAttribute.Patch, field.FieldType);
-                    if (values.Length == 0)
+                    if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(List<>))
                     {
-                        Debug.LogError($"you dont have any {field.FieldType} by patch \"Resources/{loadAttribute.Patch}\"");
-                        continue;
+                        var listType = typeof(List<>).MakeGenericType(elementType);
+                        var list = Activator.CreateInstance(listType) as IList;
+
+                        foreach (var obj in objects)
+                        {
+                            list.Add(obj);
+                        }
+
+                        field.SetValue(this, list);
                     }
-                    field.SetValue(this, values[0]);
+                    else if (field.FieldType.IsArray)
+                    {
+                        Array arr = Array.CreateInstance(elementType, objects.Length);
+                        Array.Copy(objects, arr, objects.Length);
+                        field.SetValue(this, arr);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Field {field.Name} of type {field.FieldType} is not supported for loading from Resources.");
+                    }
                 }
             }
         }

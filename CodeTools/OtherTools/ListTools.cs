@@ -38,7 +38,7 @@ namespace UniTools
         {
             var notNullList = list.ToList().FindAll(i => weight.Invoke(i) > 0);
 
-            if(notNullList.Count == 0)
+            if (notNullList.Count == 0)
                 return default;
 
             for (int i = 0; i < 1000; i++)
@@ -53,7 +53,7 @@ namespace UniTools
 
             return notNullList.First();
         }
-        public static List<T> SortWith<T, TKey>(this List<T> list, Func<T, TKey> keySelector) =>  list.OrderByDescending(keySelector)
+        public static List<T> SortWith<T, TKey>(this List<T> list, Func<T, TKey> keySelector) => list.OrderByDescending(keySelector)
                   .ThenBy(item => list.IndexOf(item))
                   .ToList();
         public static void ForEach<T>(this IReadOnlyList<T> list, Action<T> action)
@@ -61,6 +61,16 @@ namespace UniTools
             foreach (var t in list)
             {
                 action?.Invoke(t);
+            }
+        }
+        public static void ForEachWithIndexes<T>(this IReadOnlyList<T> list, Action<T, int> action)
+        {
+            if (list == null) throw new ArgumentNullException(nameof(list));
+            if (action == null) throw new ArgumentNullException(nameof(action));
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                action.Invoke(list[i], i);
             }
         }
         public static void ForEach<T>(this T[] arr, Action<T> action)
@@ -150,6 +160,14 @@ namespace UniTools
             }
             presenter.Present(list, prefab, container, onShow);
             return presenter;
+        }
+        public static IReadOnlyReactiveList<T> FindAllReactive<T>(this IReadOnlyReactiveList<T> source, Predicate<T> predicate)
+        {
+            return new ReactiveListUpdater<T, T>(source => source.FindAll(predicate), source);
+        }
+        public static IReadOnlyReactiveList<TResult> SelectReactive<TSource, TResult>(this IReadOnlyReactiveList<TSource> source, Func<TSource, TResult> selector)
+        {
+            return new ReactiveListUpdater<TSource, TResult>(val => val.Select(selector).ToList(), source);
         }
     }
 }

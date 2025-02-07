@@ -116,11 +116,11 @@ namespace UniTools
         }
         public static List<T> Resize<T>(this List<T> list, int size, T defaultValue = default)
         {
-            return Resize(list, size, i => defaultValue);
+            return CreateResizedList(list.ToList(), size, i => defaultValue);
         }
-
-        public static List<T> Resize<T>(this List<T> list, int size, Func<int, T> getValue)
+        public static List<T> CreateResizedList<T>(this IEnumerable<T> source, int size, Func<int, T> getValue)
         {
+            var list = source.ToList();
             int startCount = list.Count;
             if (startCount > size)
             {
@@ -161,13 +161,19 @@ namespace UniTools
             presenter.Present(list, prefab, container, onShow);
             return presenter;
         }
-        public static IReadOnlyReactiveList<T> FindAllReactive<T>(this IReadOnlyReactiveList<T> source, Predicate<T> predicate)
+
+        public static IReadOnlyReactiveList<T> FindAllReactive<T>(this IReadOnlyReactiveList<T> source, Func<T, bool> predicate)
         {
-            return new ReactiveListUpdater<T, T>(source => source.FindAll(predicate), source);
+            return new ReactiveListUpdater<T>(val => predicate.Invoke(val), source);
         }
         public static IReadOnlyReactiveList<TResult> SelectReactive<TSource, TResult>(this IReadOnlyReactiveList<TSource> source, Func<TSource, TResult> selector)
         {
-            return new ReactiveListUpdater<TSource, TResult>(val => val.Select(selector).ToList(), source);
+            return new ReactiveListUpdater<TSource, TResult>(val => selector.Invoke(val), source);
         }
+        public static IReadOnlyReactiveList<T> ResizeReactive<T>(this IReadOnlyReactiveList<T> list, int size, T defaultValue = default)
+        {
+            return new ReactiveListUpdater<T, T>(lst => CreateResizedList(list, size, i => defaultValue), list);
+        }
+
     }
 }

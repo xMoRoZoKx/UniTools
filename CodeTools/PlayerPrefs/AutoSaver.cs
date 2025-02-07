@@ -9,7 +9,9 @@ namespace UniTools.Reactive
     {
         Default,
         Layer1,
-        Layer2
+        Layer2,
+        Layer3,
+        Layer4
     }
     [System.Serializable]
     public class AutoSaver<T> : Reactive<T>, IAutoSaver

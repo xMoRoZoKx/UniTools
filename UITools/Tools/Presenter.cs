@@ -42,7 +42,7 @@ namespace UniTools
 
         public Connections connections = new Connections();
 
-        public Presenter<Data, View> Present(IEnumerable<Data> list, View prefab, RectTransform container, Action<View, Data> onShow, bool useIgnoreElements = true)
+        public Presenter<Data, View> Present(IEnumerable<Data> list, View prefab, RectTransform container, Action<View, Data, int> onShow, bool useIgnoreElements = true)
         {
             _views = container.GetComponentsInChildren<View>(true).ToList();
 
@@ -58,7 +58,7 @@ namespace UniTools
                     _views.Add(UnityEngine.Object.Instantiate(prefab, container));
 
                 _views[i].SetActive(true);
-                onShow?.Invoke(_views[i], list.ElementAt(i));
+                onShow?.Invoke(_views[i], list.ElementAt(i), i);
                 _data.Add((_views[i], list.ElementAt(i)));
             }
             return this;

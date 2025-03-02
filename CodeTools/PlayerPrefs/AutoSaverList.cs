@@ -8,8 +8,8 @@ namespace UniTools.Reactive
     public class AutoSaverList<T> : ReactiveList<T>, IAutoSaver
     {
         public string key { get; private set; }
-        public string layer { get; private set; }
-        public AutoSaverList(string key, string layer = PlayerPrefsPro.BASE_LAYER)
+        public SaveLayer layer { get; private set; }
+        public AutoSaverList(string key, SaveLayer layer = SaveLayer.Default)
         {
             this.key = key;
             this.layer = layer;

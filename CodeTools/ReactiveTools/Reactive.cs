@@ -121,7 +121,7 @@ namespace UniTools.Reactive
         }
 
         //TOOLS
-        public static ReactiveFunc<T1, T2> Func<T1, T2>(this IReadOnlyReactive<T1> reactive, Func<T1, T2> func)
+        public static IReadOnlyReactive<T2> Func<T1, T2>(this IReadOnlyReactive<T1> reactive, Func<T1, T2> func)
         {
             var result = new ReactiveFunc<T1, T2>
             {

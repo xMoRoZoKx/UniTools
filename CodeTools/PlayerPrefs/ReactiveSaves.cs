@@ -20,15 +20,12 @@ namespace UniTools.Reactive
         {
             return _onDataUpdate.Subscribe(onDataUpdate);
         }
-        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
+        public static void ConnectToSaver<T>(this IReactive<T> reactive, string saveKey, SaveLayer layer = SaveLayer.Default)
         {
             reactive.GetSave(saveKey, layer);
             reactive.SubscribeAndInvoke(value => reactive.Save(saveKey, layer));
-
-            // Convert.ChangeType(obj, t);
-            // reactive.SaveEachSeconds(saveKey); // IN TESTING
         }
-        public static void Save<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
+        public static void Save<T>(this IReactive<T> reactive, string saveKey, SaveLayer layer = SaveLayer.Default)
         {
             var val = reactive.GetValue();
             _onDataUpdate.Invoke(new Data()
@@ -39,7 +36,7 @@ namespace UniTools.Reactive
             });
             PlayerPrefsPro.Set(saveKey, reactive.GetValue(), layer);
         }
-        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey, string layer = PlayerPrefsPro.BASE_LAYER)
+        public static IReactive<T> GetSave<T>(this IReactive<T> reactive, string saveKey, SaveLayer layer = SaveLayer.Default)
         {
             if (reactive == null) return reactive;
             reactive.SetValue(PlayerPrefsPro.HasKey(saveKey, layer) ? PlayerPrefsPro.Get<T>(saveKey, layer) : reactive.GetValue());

@@ -16,7 +16,7 @@ namespace UniTools
             tcs.SetResult(true);
             await tcs.Task;
         }
-        public static readonly WaitController taskController = new WaitController();
+        public static readonly TaskWithPause taskController = new TaskWithPause();
         public static Task WaitForSeconds(float value, bool playInEditorMode = false) => WaitForMilliseconds((int)(value * 1000), playInEditorMode);
         public static Task WaitForMilliseconds(int value, bool playInEditorMode = false) => taskController.WaitForMilliseconds(value, playInEditorMode);
         public static async void Wait(this Component component, float seconds, Action waitEvent)
@@ -31,16 +31,5 @@ namespace UniTools
             if(!Application.isPlaying) return;
             waitEvent.Invoke();
         }
-        // public static Task Wait(AsyncOperation operation)
-        // {
-        //     if(operation == null) return WaitForSeconds(0);
-        //     return Task.Run(() =>
-        //     {
-        //         while (!operation.isDone)
-        //         {
-        //             Thread.Sleep(TimeSpan.FromMilliseconds(100));
-        //         }
-        //     });
-        // }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UniTools;
 using UnityEngine;
@@ -46,6 +47,18 @@ public class ConfigStorage
                     else
                     {
                         Debug.LogError($"Field {field.Name} of type {field.FieldType} is not supported for loading from Resources.");
+                    }
+                }
+                else
+                {
+                    var resource = Resources.LoadAll(loadAttribute.Patch, field.FieldType);// Resources.Load(loadAttribute.Patch, field.FieldType);
+                    if (resource != null && resource.Count() > 0)
+                    {
+                        field.SetValue(this, resource[0]);
+                    }
+                    else
+                    {
+                        Debug.LogError($"Failed to load resource for field {field.Name} of type {field.FieldType} from path {loadAttribute.Patch}.");
                     }
                 }
             }

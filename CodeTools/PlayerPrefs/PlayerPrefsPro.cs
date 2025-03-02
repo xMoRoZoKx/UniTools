@@ -3,12 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
-// using Newtonsoft.Json;
 
 namespace UniTools.PlayerPrefs
 {
+    public enum SaveLayer
+    {
+        Default,
+        Layer1,
+        Layer2,
+        Layer3,
+        Layer4,
+        SystemLayer
+    }
     public static class PlayerPrefsPro
     {
         [System.Serializable]
@@ -21,133 +31,105 @@ namespace UniTools.PlayerPrefs
             public T value;
         }
         public const string BASE_LAYER = "BASE", ALL_KEYS = "_ALL_KEYS", ALL_LAYERS = "_ALL_LAYERS", CONSTANT_LAYER = "CONST_LAYER";
-        public static string Patch(string key, string layerName = BASE_LAYER)
+        public static string Patch(string key, SaveLayer layer = SaveLayer.Default)
         {
-            return Application.persistentDataPath + "/" + layerName + key.Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f') + "6"; ;
+            return Application.persistentDataPath + "/" + layer.ToString() + ByteStorage.EncryptString(key + "v2").Replace('/', 'f').Replace('\\', 'f').Replace(':', 'f') + "6"; ;
         }
-        // private static JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         #region Seters
-        public static void Set<T>(string key, T obj, string layerName = BASE_LAYER) => Set(key, layerName, obj, true, true);
-        private static void Set<T>(string key, string layerName, T obj, bool needAddToKeysList, bool needAddToLayersList)
+        public static void Set<T>(string key, T obj, SaveLayer layer = SaveLayer.Default) => Set(key, layer, obj, true);
+        private static void Set<T>(string key, SaveLayer layer, T obj, bool addToKeysList)
         {
-            // SetBytes(System.Text.Encoding.Default.GetBytes(JsonUtility.ToJson(new Json<T>(obj))), key, needAddToKeysList, needAddToLayersList, layerName);
-            
-            SetBytes(ByteSerializer.ToByteArray(obj), key, needAddToKeysList, needAddToLayersList, layerName);
+            SetBytes(ByteSerializer.ToByteArray(obj), key, addToKeysList, layer);
 
-            // SetBytes(System.Text.Encoding.Default.GetBytes(JsonConvert.SerializeObject(new Json<T>(obj), settings)), key, needAddToKeysList, needAddToLayersList, layerName);
         }
-        public static void SetBytes(this byte[] bytes, string key, string layerName = BASE_LAYER) => SetBytes(bytes, key, true, true, layerName);
-        private static void SetBytes(this byte[] bytes, string key, bool needAddToKeysList, bool needAddToLayersList, string layerName = BASE_LAYER)
+        public static void SetBytes(this byte[] bytes, string key, SaveLayer layer = SaveLayer.Default) => SetBytes(bytes, key, true, layer);
+        private static void SetBytes(this byte[] bytes, string key, bool addToKeysList, SaveLayer layer = SaveLayer.Default)
         {
             if (bytes == null) return;
 
-            File.WriteAllBytes(Patch(key, layerName), bytes);
+            File.WriteAllBytes(Patch(key, layer),ByteStorage.EncryptBytes(bytes));
 
-            if (needAddToLayersList) AddNewLayer(layerName);
-            if (needAddToKeysList) AddNewKey(key, layerName);
+            if (addToKeysList) AddNewKey(key, layer);
         }
-        public static void SetSprite(string key, Sprite sprite, string layerName = BASE_LAYER) => SetTexture(key, sprite.texture, layerName); //File.WriteAllBytes(Patch(layerName) + GetKey(key), sprite.texture.EncodeToPNG());
-        public static void SetTexture(string key, Texture2D texture, string layerName = BASE_LAYER) => SetBytes(texture.EncodeToPNG(), key, layerName);//=> File.WriteAllBytes(Patch(layerName) + GetKey(key), texture.EncodeToPNG());
-        public static void SetFloat(string key, float value, string layerName = BASE_LAYER) => Set(key, value, layerName);
-        public static void SetInt(string key, int value, string layerName = BASE_LAYER) => Set(key, value, layerName);
-        public static void SetString(string key, string value, string layerName = BASE_LAYER) => Set(key, value, layerName);
+        public static void SetSprite(string key, Sprite sprite, SaveLayer layer = SaveLayer.Default) => SetTexture(key, sprite.texture, layer); 
+        public static void SetTexture(string key, Texture2D texture, SaveLayer layer = SaveLayer.Default) => SetBytes(texture.EncodeToPNG(), key, layer);
+        public static void SetFloat(string key, float value, SaveLayer layer = SaveLayer.Default) => Set(key, value, layer);
+        public static void SetInt(string key, int value, SaveLayer layer = SaveLayer.Default) => Set(key, value, layer);
+        public static void SetString(string key, string value, SaveLayer layer = SaveLayer.Default) => Set(key, value, layer);
         #endregion
 
         #region Geters
-        public static T Get<T>(string key, string layerName = BASE_LAYER)
+        public static T Get<T>(string key, SaveLayer layer = SaveLayer.Default)
         {
-            // var bytes = GetBytes(key, layerName);
-
-            // string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
-            // if (String.IsNullOrEmpty(json)) return default;
-            // return JsonUtility.FromJson<Json<T>>(json).value;
-
-            return ByteSerializer.ByteArrayTo<T>(GetBytes(key, layerName));
-
-            // var bytes = GetBytes(key, layerName);
-
-            // string json = bytes == null ? "" : System.Text.Encoding.Default.GetString(bytes);
-            // if (String.IsNullOrEmpty(json)) return default;
-            // return JsonConvert.DeserializeObject<Json<T>>(json, settings).value;
+            return ByteSerializer.ByteArrayTo<T>(GetBytes(key, layer));
         }
-        public static byte[] GetBytes(string key, string layerName = BASE_LAYER)
+        public static byte[] GetBytes(string key, SaveLayer layer = SaveLayer.Default)
         {
-            if (!HasKey(key, layerName)) return null;
-            return File.ReadAllBytes(Patch(key, layerName));
+            if (!HasKey(key, layer)) return null;
+            return ByteStorage.DecryptBytes(File.ReadAllBytes(Patch(key, layer)));
         }
-        public static string GetPatch(string key, string layerName = BASE_LAYER)
+        public static string GetPatch(string key, SaveLayer layer = SaveLayer.Default)
         {
-            return Patch(key, layerName);
+            return Patch(key, layer);
         }
-        public static Sprite GetSprite(string key, string layerName = BASE_LAYER)
+        public static Sprite GetSprite(string key, SaveLayer layer = SaveLayer.Default)
         {
-            var texture = GetTexture(key, layerName);
+            var texture = GetTexture(key, layer);
 
             if (texture == null) return null;
 
             return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100);
         }
-        public static Texture2D GetTexture(string key, string layerName = BASE_LAYER)
+        public static Texture2D GetTexture(string key, SaveLayer layer = SaveLayer.Default)
         {
-            if (!HasKey(key, layerName)) return null;
+            if (!HasKey(key, layer)) return null;
 
             Texture2D texture = new(500, 500);//Texture2D.normalTexture;
 
-            texture.LoadImage(File.ReadAllBytes(Patch(key, layerName)));
+            texture.LoadImage(File.ReadAllBytes(Patch(key, layer)));
             return texture;
         }
-        public static float GetFloat(string key, string layerName = BASE_LAYER) => Get<float>(key, layerName);
-        public static int GetInt(string key, string layerName = BASE_LAYER) => Get<int>(key, layerName);
-        public static string GetString(string key, string layerName = BASE_LAYER) => Get<string>(key, layerName);
+        public static float GetFloat(string key, SaveLayer layer = SaveLayer.Default) => Get<float>(key, layer);
+        public static int GetInt(string key, SaveLayer layer = SaveLayer.Default) => Get<int>(key, layer);
+        public static string GetString(string key, SaveLayer layer = SaveLayer.Default) => Get<string>(key, layer);
         #endregion
         #region Layers
-        public static List<string> GetAllKeys(string layerName = BASE_LAYER)
+        public static List<string> GetAllKeys(SaveLayer layer = SaveLayer.Default)
         {
-            var keys = Get<List<string>>(layerName + ALL_KEYS, CONSTANT_LAYER);
+            var keys = Get<List<string>>(layer + ALL_KEYS, SaveLayer.SystemLayer);
             return keys ?? new List<string>();
         }
         public static List<string> GetAllLayers()
         {
-            return Get<List<string>>(ALL_LAYERS, CONSTANT_LAYER);
+            return Get<List<string>>(ALL_LAYERS, SaveLayer.SystemLayer);
         }
 
-        private static void AddNewKey(string newKey, string layerName)
+        private static void AddNewKey(string newKey, SaveLayer layer)
         {
-            var keys = GetAllKeys(layerName);
+            var keys = GetAllKeys(layer);
             if (keys == null) keys = new List<string>();
 
             if (keys.Contains(newKey)) return;
 
             keys.Add(newKey);
 
-            Set(layerName + ALL_KEYS, CONSTANT_LAYER, keys, false, false);
-        }
-        private static void AddNewLayer(string newLayer)
-        {
-            var layers = GetAllLayers();
-            if (layers == null) layers = new List<string>();
-
-            if (layers.Contains(newLayer)) return;
-
-            layers.Add(newLayer);
-
-            Set(ALL_LAYERS, CONSTANT_LAYER, layers, false, false);
+            Set(layer + ALL_KEYS, SaveLayer.SystemLayer, keys, false);
         }
         #endregion
-        public static bool HasKey(string key, string layerName = BASE_LAYER) => File.Exists(Patch(key, layerName));
+        public static bool HasKey(string key, SaveLayer layer = SaveLayer.Default) => File.Exists(Patch(key, layer));
 
         #region ClearSaves
-        public static void DeleteSave(string key, string layerName = BASE_LAYER)
+        public static void DeleteSave(string key, SaveLayer layer = SaveLayer.Default)
         {
-            if (!HasKey(key, layerName)) return;
+            if (!HasKey(key, layer)) return;
 
-            var keys = GetAllKeys(layerName);
+            var keys = GetAllKeys(layer);
 
-            File.Delete(Patch(key, layerName));
+            File.Delete(Patch(key, layer));
             keys.RemoveAll(k => k == key);
 
-            Set(layerName + ALL_KEYS, CONSTANT_LAYER, keys, false, false);
+            Set(layer + ALL_KEYS, SaveLayer.SystemLayer, keys, false);
 
         }
 #if UNITY_EDITOR
@@ -155,22 +137,113 @@ namespace UniTools.PlayerPrefs
 #endif
         public static void DeleteDefaulSaves()
         {
-            GetAllKeys(BASE_LAYER)?.ForEach(key => DeleteSave(key, BASE_LAYER));
-            Set(BASE_LAYER + ALL_KEYS, BASE_LAYER, new List<string>(), false, false);
+            DeleteAllSaves(SaveLayer.Default);
         }
-        public static void DeleteAllSaves(string layerName = BASE_LAYER)
+        public static void DeleteAllSaves(SaveLayer layer = SaveLayer.Default)
         {
-            GetAllKeys(layerName)?.ForEach(key => DeleteSave(key, layerName));
-            Set(layerName + ALL_KEYS, layerName, new List<string>(), false, false);
+            GetAllKeys(layer)?.ForEach(key => DeleteSave(key, layer));
+            Set(layer + ALL_KEYS, layer, new List<string>(), false);
+        }
+#if UNITY_EDITOR
+        [MenuItem("PlayerPrefsPro/Clear Layer1")]
+#endif
+        public static void DeleteLayer1Saves()
+        {
+            DeleteAllSaves(SaveLayer.Layer1);
+        }
+#if UNITY_EDITOR
+        [MenuItem("PlayerPrefsPro/Clear Layer2")]
+#endif
+        public static void DeleteLayer2Saves()
+        {
+            DeleteAllSaves(SaveLayer.Layer2);
+        }
+#if UNITY_EDITOR
+        [MenuItem("PlayerPrefsPro/Clear Layer3")]
+#endif
+        public static void DeleteLayer3Saves()
+        {
+            DeleteAllSaves(SaveLayer.Layer3);
+        }
+#if UNITY_EDITOR
+        [MenuItem("PlayerPrefsPro/Clear Layer4")]
+#endif
+        public static void DeleteLayer4Saves()
+        {
+            DeleteAllSaves(SaveLayer.Layer4);
         }
 #if UNITY_EDITOR
         [MenuItem("PlayerPrefsPro/Clear All Layers")]
 #endif
         public static void DeleteAllLayers()
         {
-            GetAllLayers()?.ForEach(layer => DeleteAllSaves(layer));
-            Set(ALL_LAYERS, CONSTANT_LAYER, new List<string>(), false, false);
+            EnumTools.GetValues<SaveLayer>().ForEach(layer => DeleteAllSaves(layer));
         }
         #endregion
+    }
+    public static class ByteStorage
+    {
+        private const string BASE_LAYER = "DefaultLayer";
+        private const string EncryptionKey = "YourSecureKey123"; // need 16, 24 or 32 bytes for AES
+
+       public static string EncryptString(string text)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
+                aes.IV = new byte[16]; 
+
+                using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                {
+                    byte[] inputBytes = Encoding.UTF8.GetBytes(text);
+                    byte[] encryptedBytes = encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
+                    return Convert.ToBase64String(encryptedBytes);
+                }
+            }
+        }
+
+        public static string DecryptString(string encryptedText)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
+                aes.IV = new byte[16];
+
+                using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                {
+                    byte[] encryptedBytes = Convert.FromBase64String(encryptedText);
+                    byte[] decryptedBytes = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+                    return Encoding.UTF8.GetString(decryptedBytes);
+                }
+            }
+        }
+
+        public static byte[] EncryptBytes(byte[] data)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
+                aes.IV = new byte[16];
+
+                using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                {
+                    return encryptor.TransformFinalBlock(data, 0, data.Length);
+                }
+            }
+        }
+
+        public static byte[] DecryptBytes(byte[] encryptedData)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(EncryptionKey);
+                aes.IV = new byte[16];
+
+                using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                {
+                    return decryptor.TransformFinalBlock(encryptedData, 0, encryptedData.Length);
+                }
+            }
+        }
     }
 }

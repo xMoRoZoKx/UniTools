@@ -11,6 +11,12 @@ public class Connections : IDisposable
         connections.connects.Add(dispos);
         return connections;
     }
+    public static Connections operator +(Connections connections, IEnumerable<IDisposable> disposables)
+    {
+        connections.connects.AddRange(disposables);
+        return connections;
+    }
+
     public void Add(Action action)
     {
         connects.Add(new DisposableAction(action));

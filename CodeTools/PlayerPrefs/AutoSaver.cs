@@ -4,26 +4,17 @@ using UniTools.PlayerPrefs;
 
 namespace UniTools.Reactive
 {
-
-    public enum SaveLayers
-    {
-        Default,
-        Layer1,
-        Layer2,
-        Layer3,
-        Layer4
-    }
     [System.Serializable]
     public class AutoSaver<T> : Reactive<T>, IAutoSaver
     {
         public string key { get; private set; }
-        public string layer { get; private set; }
-        public AutoSaver(string key, SaveLayers saveLayer = SaveLayers.Default)
+        public SaveLayer layer { get; private set; }
+        public AutoSaver(string key, SaveLayer layer = SaveLayer.Default)
         {
             this.key = key;
             this.ConnectToSaver(key, layer);
         }
-        public AutoSaver(string key, T defaultValue, SaveLayers saveLayer = SaveLayers.Default)
+        public AutoSaver(string key, T defaultValue, SaveLayer layer = SaveLayer.Default)
         {
             if (!PlayerPrefsPro.HasKey(key, layer)) value = defaultValue;
 

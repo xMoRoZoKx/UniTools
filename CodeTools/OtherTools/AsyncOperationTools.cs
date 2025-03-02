@@ -1,14 +1,12 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public static class AsyncOperationTools
 {
-    public static void OnComplete(this AsyncOperation asyncLoad, Action action)
+    public static void OnComplete(this AsyncOperation asyncLoad, Action action, string operationName = "AsyncOperation")
     {
-        CoroutineRunner runner = new GameObject("Loading scene...").AddComponent<CoroutineRunner>();
+        CoroutineRunner runner = new GameObject(operationName).AddComponent<CoroutineRunner>();
         UnityEngine.Object.DontDestroyOnLoad(runner);
         var cor = runner.StartCoroutine(LoadAsync(asyncLoad, () =>
         {

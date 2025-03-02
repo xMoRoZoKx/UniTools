@@ -6,7 +6,7 @@ public class ConnectableMonoBehaviour : MonoBehaviour
 {
     [HideInInspector] public Connections connections = new Connections();
 
-    private void OnDestroy()
+    protected virtual void OnDestroy()
     {
         connections.DisconnectAll();
     }

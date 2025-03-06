@@ -3,10 +3,7 @@ using UnityEngine;
 
 namespace UniTools
 {
-    public static class ColorTools
-    {
-        public static Color WithAlpha(this Color color, float alpha) => new Color() { r = color.r, g = color.g, b = color.b, a = alpha };
-    }
+    
     public static class RandomTools
     {
         public static void InvokWithChance(Action action, int chance)

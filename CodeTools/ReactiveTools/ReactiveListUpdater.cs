@@ -6,24 +6,6 @@ using System.Linq;
 using UniTools.Reactive;
 using UnityEngine;
 
-//public class MergedReactive<T> : Reactive<T[]>, IDisposable
-//{
-//    private Connections connections = new();
-
-//    public MergedReactive(IReadOnlyReactive<T>[] sources)
-//    {
-//        connections += sources.Select(source => source.Subscribe(_ => UpdateValues(sources)));
-//        UpdateValues(sources);
-//    }
-
-//    private void UpdateValues(IReadOnlyReactive<T>[] sources)
-//    {
-//        value = sources.Select(s => s.Value).ToArray();
-//        InvokeEvents();
-//    }
-
-//    public void Dispose() => connections.Dispose();
-//}
 public class MergedReactive<T1, T2> : Reactive<(T1, T2)>, IDisposable
 {
     public MergedReactive(IReadOnlyReactive<T1> source1, IReadOnlyReactive<T2> source2)
